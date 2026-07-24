@@ -8,7 +8,6 @@
         <item name="colorOnSecondary">@color/text_primary</item>
         <item name="colorSurface">@color/card</item>
         <item name="colorOnSurface">@color/text_primary</item>
-        <item name="colorBackground">@color/background</item>
         <item name="android:colorBackground">@color/background</item>
         <item name="colorError">@color/danger</item>
         <item name="android:statusBarColor">@color/transparent</item>
@@ -24,7 +23,6 @@
         <item name="android:background">@color/nav_background</item>
         <item name="itemIconTint">@color/nav_item_color</item>
         <item name="itemTextColor">@color/nav_item_color</item>
-        <item name="activeIndicatorColor">@color/nav_indicator</item>
         <item name="elevation">16dp</item>
     </style>
 
