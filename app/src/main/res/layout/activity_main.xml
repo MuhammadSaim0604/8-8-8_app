@@ -7,7 +7,7 @@
     android:background="@color/background"
     android:fitsSystemWindows="false">
 
-    <!-- Nav host -->
+    <!-- Nav host fills the entire screen; fragments supply their own bottom padding -->
     <androidx.fragment.app.FragmentContainerView
         android:id="@+id/navHostFragment"
         android:name="androidx.navigation.fragment.NavHostFragment"
@@ -16,13 +16,13 @@
         app:defaultNavHost="true"
         app:navGraph="@navigation/nav_graph" />
 
-    <!-- MiniPlayer (slides up above BottomNav) -->
+    <!-- MiniPlayer slides up from above the bottom nav (margin = nav height, set in code) -->
     <FrameLayout
         android:id="@+id/miniPlayerContainer"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_gravity="bottom"
-        android:layout_marginBottom="64dp"
+        android:layout_marginBottom="80dp"
         android:visibility="gone"
         android:alpha="0"
         android:translationY="200dp">
@@ -30,17 +30,32 @@
         <include layout="@layout/layout_mini_player" />
     </FrameLayout>
 
-    <!-- Bottom Navigation -->
+    <!-- Global FAB — always visible on tab screens, opens QuickMenuSheet -->
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/fabQuickMenu"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|end"
+        android:layout_marginEnd="20dp"
+        android:layout_marginBottom="96dp"
+        android:contentDescription="Quick menu"
+        app:backgroundTint="@color/accent_blue"
+        app:srcCompat="@drawable/ic_grid"
+        app:tint="@color/text_primary"
+        app:elevation="8dp"
+        app:fabSize="normal" />
+
+    <!-- Bottom Navigation — Material3 recommended 80dp height -->
     <com.google.android.material.bottomnavigation.BottomNavigationView
         android:id="@+id/bottomNav"
         android:layout_width="match_parent"
-        android:layout_height="64dp"
+        android:layout_height="80dp"
         android:layout_gravity="bottom"
         android:background="@color/nav_background"
         app:itemIconTint="@color/nav_item_color"
         app:itemTextColor="@color/nav_item_color"
         app:labelVisibilityMode="labeled"
         app:menu="@menu/bottom_nav_menu"
-        app:elevation="8dp" />
+        app:elevation="16dp" />
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

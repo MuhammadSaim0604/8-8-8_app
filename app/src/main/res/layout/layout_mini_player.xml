@@ -21,12 +21,17 @@
         android:layout_height="match_parent"
         android:orientation="vertical">
 
-        <!-- Thin progress bar at top -->
-        <View
-            android:id="@+id/miniPlayerProgress"
-            android:layout_width="0dp"
+        <!-- Top progress track + fill -->
+        <FrameLayout
+            android:layout_width="match_parent"
             android:layout_height="3dp"
-            android:background="@color/accent_blue" />
+            android:background="@color/track">
+            <View
+                android:id="@+id/miniPlayerProgress"
+                android:layout_width="0dp"
+                android:layout_height="3dp"
+                android:background="@color/accent_blue" />
+        </FrameLayout>
 
         <!-- Content row -->
         <LinearLayout
@@ -99,23 +104,23 @@
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnMiniPause"
                 style="@style/Widget.Material3.Button.IconButton"
-                android:layout_width="42dp"
-                android:layout_height="42dp"
+                android:layout_width="44dp"
+                android:layout_height="44dp"
                 android:padding="0dp"
                 app:icon="@drawable/ic_pause"
                 app:iconTint="@color/accent_blue"
-                app:iconSize="20dp" />
+                app:iconSize="22dp" />
 
             <!-- Stop button -->
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnMiniStop"
                 style="@style/Widget.Material3.Button.IconButton"
-                android:layout_width="42dp"
-                android:layout_height="42dp"
+                android:layout_width="44dp"
+                android:layout_height="44dp"
                 android:padding="0dp"
                 app:icon="@drawable/ic_stop"
                 app:iconTint="@color/danger"
-                app:iconSize="20dp" />
+                app:iconSize="22dp" />
 
         </LinearLayout>
     </LinearLayout>

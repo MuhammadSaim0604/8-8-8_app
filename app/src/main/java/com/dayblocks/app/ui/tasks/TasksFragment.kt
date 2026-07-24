@@ -19,7 +19,6 @@ import com.dayblocks.app.databinding.FragmentTasksBinding
 import com.dayblocks.app.ui.sheets.AddTaskSheet
 import com.dayblocks.app.ui.sheets.DeleteConfirmSheet
 import com.dayblocks.app.ui.sheets.SwitchTaskSheet
-import com.dayblocks.app.ui.quickmenu.QuickMenuSheet
 import com.dayblocks.app.viewmodel.MainViewModel
 import kotlinx.coroutines.launch
 
@@ -36,10 +35,6 @@ class TasksFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
-        binding.fabQuickMenu.setOnClickListener {
-            QuickMenuSheet().show(childFragmentManager, "quick_menu")
-        }
 
         observe()
     }
@@ -120,9 +115,17 @@ class TasksFragment : Fragment() {
 
         val btnAdd = com.google.android.material.button.MaterialButton(requireContext(),
             null, com.google.android.material.R.attr.materialButtonOutlinedStyle).apply {
-            text = "+"; textSize = 14f
+            text = "+"
+            textSize = 13f
+            minWidth = 0
+            minimumWidth = 0
+            minHeight = 0
+            minimumHeight = 0
+            setPaddingRelative(10.dp(), 4.dp(), 10.dp(), 4.dp())
+            insetTop = 0
+            insetBottom = 0
             layoutParams = LinearLayout.LayoutParams(
-                ViewGroup.LayoutParams.WRAP_CONTENT, 32.dp()
+                ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT
             ).apply { marginStart = 8.dp() }
             setOnClickListener { showAddTask(block) }
         }

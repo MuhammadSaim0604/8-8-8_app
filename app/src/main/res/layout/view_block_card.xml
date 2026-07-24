@@ -19,7 +19,7 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <!-- Block name -->
+    <!-- Block name — anchored next to emoji, ending before ring -->
     <TextView
         android:id="@+id/tvBlockName"
         android:layout_width="0dp"
@@ -47,23 +47,22 @@
         app:layout_constraintTop_toBottomOf="@id/tvBlockName"
         app:layout_constraintEnd_toStartOf="@id/progressRing" />
 
-    <!-- Circular progress ring -->
+    <!-- Circular progress ring — top-right, NOT vertically centred in card -->
     <com.dayblocks.app.ui.common.CircularProgressView
         android:id="@+id/progressRing"
         android:layout_width="64dp"
         android:layout_height="64dp"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent" />
+        app:layout_constraintTop_toTopOf="parent" />
 
-    <!-- Stats row -->
+    <!-- Stats row — BELOW the ring (not below the emoji) -->
     <LinearLayout
         android:id="@+id/llStats"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:layout_marginTop="14dp"
-        app:layout_constraintTop_toBottomOf="@id/tvBlockEmoji"
+        android:layout_marginTop="12dp"
+        app:layout_constraintTop_toBottomOf="@id/progressRing"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent">
 
