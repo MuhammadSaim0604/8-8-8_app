@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<full-backup-content>
+    <include domain="sharedpref" path="." />
+    <include domain="database" path="dayblocks.db" />
+    <exclude domain="sharedpref" path="dayblocks_prefs.xml" />
+</full-backup-content>

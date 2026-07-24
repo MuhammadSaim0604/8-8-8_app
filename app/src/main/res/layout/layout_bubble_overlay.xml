@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="80dp"
+    android:layout_height="80dp">
+
+    <!-- Glow ring (animated pulse) -->
+    <View
+        android:id="@+id/vBubbleGlow"
+        android:layout_width="80dp"
+        android:layout_height="80dp"
+        android:layout_gravity="center"
+        android:background="@drawable/bg_bubble_glow" />
+
+    <!-- Bubble body -->
+    <LinearLayout
+        android:id="@+id/bubbleBody"
+        android:layout_width="68dp"
+        android:layout_height="68dp"
+        android:layout_gravity="center"
+        android:background="@drawable/bg_bubble"
+        android:orientation="vertical"
+        android:gravity="center"
+        android:padding="6dp">
+
+        <TextView
+            android:id="@+id/tvBubbleTimer"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="14sp"
+            android:textColor="#FFFFFF"
+            android:textStyle="bold"
+            android:fontFamily="monospace"
+            android:text="00:00" />
+
+        <TextView
+            android:id="@+id/tvBubbleTask"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="9sp"
+            android:textColor="#AAAAAA"
+            android:ellipsize="end"
+            android:maxLines="1"
+            android:text="Task" />
+    </LinearLayout>
+
+</FrameLayout>

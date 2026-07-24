@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Spacing -->
+    <dimen name="spacing_xs">4dp</dimen>
+    <dimen name="spacing_sm">8dp</dimen>
+    <dimen name="spacing_md">12dp</dimen>
+    <dimen name="spacing_lg">16dp</dimen>
+    <dimen name="spacing_xl">20dp</dimen>
+    <dimen name="spacing_xxl">24dp</dimen>
+    <dimen name="spacing_xxxl">32dp</dimen>
+
+    <!-- Card -->
+    <dimen name="card_radius">16dp</dimen>
+    <dimen name="card_radius_lg">20dp</dimen>
+    <dimen name="card_radius_xl">24dp</dimen>
+    <dimen name="card_padding">16dp</dimen>
+    <dimen name="card_elevation">0dp</dimen>
+
+    <!-- Progress Ring -->
+    <dimen name="ring_stroke_sm">8dp</dimen>
+    <dimen name="ring_stroke_md">10dp</dimen>
+    <dimen name="ring_stroke_lg">12dp</dimen>
+    <dimen name="ring_size_sm">64dp</dimen>
+    <dimen name="ring_size_md">100dp</dimen>
+    <dimen name="ring_size_lg">130dp</dimen>
+    <dimen name="ring_size_xl">240dp</dimen>
+
+    <!-- Buttons -->
+    <dimen name="btn_play_lg">84dp</dimen>
+    <dimen name="btn_stop">52dp</dimen>
+    <dimen name="btn_play_sm">42dp</dimen>
+    <dimen name="fab_size">56dp</dimen>
+    <dimen name="fab_margin">24dp</dimen>
+
+    <!-- Typography -->
+    <dimen name="text_xs">10sp</dimen>
+    <dimen name="text_sm">12sp</dimen>
+    <dimen name="text_md">14sp</dimen>
+    <dimen name="text_lg">16sp</dimen>
+    <dimen name="text_xl">18sp</dimen>
+    <dimen name="text_xxl">22sp</dimen>
+    <dimen name="text_display">28sp</dimen>
+    <dimen name="text_hero">40sp</dimen>
+
+    <!-- Nav bar -->
+    <dimen name="bottom_nav_height">64dp</dimen>
+    <dimen name="mini_player_height">72dp</dimen>
+
+    <!-- Bubble -->
+    <dimen name="bubble_size">80dp</dimen>
+    <dimen name="bubble_glow_size">92dp</dimen>
+
+    <!-- Task card -->
+    <dimen name="task_accent_bar">3dp</dimen>
+    <dimen name="task_card_radius">14dp</dimen>
+    <dimen name="progress_bar_height">3dp</dimen>
+</resources>

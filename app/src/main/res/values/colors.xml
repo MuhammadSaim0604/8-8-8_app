@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- App background -->
+    <color name="background">#0B0B0D</color>
+    <color name="surface">#111113</color>
+    <color name="card">#171719</color>
+    <color name="card_elevated">#1E1E22</color>
+    <color name="divider">#252528</color>
+
+    <!-- Text -->
+    <color name="text_primary">#FFFFFF</color>
+    <color name="text_secondary">#9CA3AF</color>
+    <color name="text_muted">#6B7280</color>
+    <color name="text_disabled">#4B5563</color>
+
+    <!-- Accent / Primary -->
+    <color name="accent_blue">#3B82F6</color>
+    <color name="accent_blue_dim">#1D4ED8</color>
+    <color name="accent_blue_glow">#3B82F640</color>
+
+    <!-- Block colors -->
+    <color name="block_sleep">#8B5CF6</color>
+    <color name="block_sleep_dim">#6D28D9</color>
+    <color name="block_sleep_glow">#8B5CF620</color>
+    <color name="block_sleep_surface">#1A1428</color>
+
+    <color name="block_work">#3B82F6</color>
+    <color name="block_work_dim">#1D4ED8</color>
+    <color name="block_work_glow">#3B82F620</color>
+    <color name="block_work_surface">#101828</color>
+
+    <color name="block_personal">#10B981</color>
+    <color name="block_personal_dim">#047857</color>
+    <color name="block_personal_glow">#10B98120</color>
+    <color name="block_personal_surface">#0D1F1A</color>
+
+    <!-- Status -->
+    <color name="danger">#EF4444</color>
+    <color name="danger_dim">#B91C1C</color>
+    <color name="danger_surface">#1C0F0F</color>
+    <color name="warning">#F59E0B</color>
+    <color name="success">#10B981</color>
+
+    <!-- Navigation -->
+    <color name="nav_background">#0F0F12</color>
+    <color name="nav_indicator">#1E1E22</color>
+
+    <!-- Task palette -->
+    <color name="task_blue">#3B82F6</color>
+    <color name="task_purple">#8B5CF6</color>
+    <color name="task_green">#10B981</color>
+    <color name="task_orange">#F97316</color>
+    <color name="task_red">#EF4444</color>
+    <color name="task_pink">#EC4899</color>
+    <color name="task_cyan">#06B6D4</color>
+    <color name="task_amber">#F59E0B</color>
+    <color name="task_lime">#84CC16</color>
+    <color name="task_indigo">#6366F1</color>
+
+    <!-- System -->
+    <color name="transparent">#00000000</color>
+    <color name="scrim">#80000000</color>
+    <color name="track">#1E1E2E</color>
+</resources>

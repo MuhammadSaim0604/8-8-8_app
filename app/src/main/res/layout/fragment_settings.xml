@@ -1,0 +1,310 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.core.widget.NestedScrollView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/background"
+    android:clipToPadding="false"
+    android:paddingBottom="160dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <!-- App branding header -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:gravity="center"
+            android:paddingTop="56dp"
+            android:paddingBottom="24dp"
+            android:paddingStart="20dp"
+            android:paddingEnd="20dp">
+
+            <ImageView
+                android:layout_width="72dp"
+                android:layout_height="72dp"
+                android:src="@mipmap/ic_launcher"
+                android:layout_marginBottom="12dp" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="DayBlocks"
+                android:textSize="22sp"
+                android:textColor="@color/text_primary"
+                android:textStyle="bold" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Your day. Your time. Your rules."
+                android:textSize="13sp"
+                android:textColor="@color/text_muted"
+                android:layout_marginTop="4dp" />
+        </LinearLayout>
+
+        <!-- Data Overview -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:paddingStart="20dp"
+            android:paddingEnd="20dp"
+            android:paddingBottom="24dp"
+            android:weightSum="3">
+
+            <include android:id="@+id/cardDataTasks" layout="@layout/view_summary_card"
+                android:layout_width="0dp" android:layout_height="wrap_content"
+                android:layout_weight="1" android:layout_marginEnd="6dp" />
+            <include android:id="@+id/cardDataSessions" layout="@layout/view_summary_card"
+                android:layout_width="0dp" android:layout_height="wrap_content"
+                android:layout_weight="1" android:layout_marginStart="3dp" android:layout_marginEnd="3dp" />
+            <include android:id="@+id/cardDataBlocks" layout="@layout/view_summary_card"
+                android:layout_width="0dp" android:layout_height="wrap_content"
+                android:layout_weight="1" android:layout_marginStart="6dp" />
+        </LinearLayout>
+
+        <!-- Section: Permissions -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="PERMISSIONS"
+            android:textSize="11sp" android:textColor="@color/text_muted"
+            android:letterSpacing="0.12"
+            android:paddingStart="20dp" android:paddingBottom="8dp" />
+
+        <com.google.android.material.card.MaterialCardView
+            style="@style/CardStyle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="20dp"
+            android:layout_marginEnd="20dp"
+            android:layout_marginBottom="20dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="16dp">
+
+                <!-- Notifications -->
+                <LinearLayout
+                    android:id="@+id/rowNotifications"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:paddingBottom="16dp">
+
+                    <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content"
+                        android:layout_weight="1" android:orientation="vertical">
+                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                            android:text="Notifications" android:textSize="15sp"
+                            android:textColor="@color/text_primary" android:textStyle="bold" />
+                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                            android:text="Live timer in notification bar"
+                            android:textSize="12sp" android:textColor="@color/text_muted" />
+                    </LinearLayout>
+
+                    <TextView android:id="@+id/tvNotifStatus"
+                        android:layout_width="wrap_content" android:layout_height="wrap_content"
+                        android:text="Enabled" android:textSize="12sp"
+                        android:textColor="@color/success" android:paddingEnd="8dp" />
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btnNotifAction"
+                        style="@style/ButtonOutlined"
+                        android:layout_width="wrap_content"
+                        android:layout_height="36dp"
+                        android:textSize="12sp"
+                        android:text="Allow"
+                        android:visibility="gone" />
+                </LinearLayout>
+
+                <View android:layout_width="match_parent" android:layout_height="1dp"
+                    android:background="@color/divider" android:layout_marginBottom="16dp" />
+
+                <!-- Overlay permission -->
+                <LinearLayout
+                    android:id="@+id/rowOverlay"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical">
+
+                    <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content"
+                        android:layout_weight="1" android:orientation="vertical">
+                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                            android:text="Display Over Other Apps" android:textSize="15sp"
+                            android:textColor="@color/text_primary" android:textStyle="bold" />
+                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                            android:text="Floating timer bubble"
+                            android:textSize="12sp" android:textColor="@color/text_muted" />
+                    </LinearLayout>
+
+                    <TextView android:id="@+id/tvOverlayStatus"
+                        android:layout_width="wrap_content" android:layout_height="wrap_content"
+                        android:textSize="12sp" android:paddingEnd="8dp"
+                        android:text="Disabled" android:textColor="@color/danger" />
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btnOverlayAction"
+                        style="@style/ButtonOutlined"
+                        android:layout_width="wrap_content"
+                        android:layout_height="36dp"
+                        android:textSize="12sp"
+                        android:text="Settings" />
+                </LinearLayout>
+
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <!-- Section: Daily Reset -->
+        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+            android:text="DAILY RESET" android:textSize="11sp" android:textColor="@color/text_muted"
+            android:letterSpacing="0.12" android:paddingStart="20dp" android:paddingBottom="8dp" />
+
+        <com.google.android.material.card.MaterialCardView
+            style="@style/CardStyle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="20dp"
+            android:layout_marginEnd="20dp"
+            android:layout_marginBottom="20dp">
+
+            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:orientation="horizontal" android:gravity="center_vertical"
+                android:padding="16dp">
+                <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content"
+                    android:layout_weight="1" android:orientation="vertical">
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                        android:text="Reset Time" android:textSize="15sp"
+                        android:textColor="@color/text_primary" android:textStyle="bold" />
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                        android:text="Clears daily progress, keeps tasks"
+                        android:textSize="12sp" android:textColor="@color/text_muted" />
+                </LinearLayout>
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                    android:text="12:00 AM" android:textSize="14sp"
+                    android:textColor="@color/text_secondary" />
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <!-- Section: Data & Privacy -->
+        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+            android:text="DATA &amp; PRIVACY" android:textSize="11sp" android:textColor="@color/text_muted"
+            android:letterSpacing="0.12" android:paddingStart="20dp" android:paddingBottom="8dp" />
+
+        <com.google.android.material.card.MaterialCardView
+            style="@style/CardStyle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="20dp"
+            android:layout_marginEnd="20dp"
+            android:layout_marginBottom="20dp">
+
+            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:orientation="vertical" android:padding="16dp">
+
+                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                    android:orientation="horizontal" android:gravity="center_vertical"
+                    android:paddingBottom="16dp">
+                    <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content"
+                        android:layout_weight="1" android:orientation="vertical">
+                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                            android:text="Clear History" android:textSize="15sp"
+                            android:textColor="@color/text_primary" android:textStyle="bold" />
+                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                            android:text="Deletes all sessions and stats"
+                            android:textSize="12sp" android:textColor="@color/text_muted" />
+                    </LinearLayout>
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btnClearHistory"
+                        style="@style/ButtonDanger"
+                        android:layout_width="wrap_content"
+                        android:layout_height="36dp"
+                        android:textSize="12sp"
+                        android:text="Clear" />
+                </LinearLayout>
+
+                <View android:layout_width="match_parent" android:layout_height="1dp"
+                    android:background="@color/divider" android:layout_marginBottom="16dp" />
+
+                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                    android:orientation="horizontal" android:gravity="center_vertical">
+                    <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content"
+                        android:layout_weight="1" android:orientation="vertical">
+                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                            android:text="Reset Everything" android:textSize="15sp"
+                            android:textColor="@color/danger" android:textStyle="bold" />
+                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                            android:text="Deletes all tasks, history, settings"
+                            android:textSize="12sp" android:textColor="@color/text_muted" />
+                    </LinearLayout>
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btnResetAll"
+                        style="@style/ButtonDanger"
+                        android:layout_width="wrap_content"
+                        android:layout_height="36dp"
+                        android:textSize="12sp"
+                        android:text="Reset" />
+                </LinearLayout>
+
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <!-- About -->
+        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+            android:text="ABOUT" android:textSize="11sp" android:textColor="@color/text_muted"
+            android:letterSpacing="0.12" android:paddingStart="20dp" android:paddingBottom="8dp" />
+
+        <com.google.android.material.card.MaterialCardView
+            style="@style/CardStyle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="20dp"
+            android:layout_marginEnd="20dp"
+            android:layout_marginBottom="20dp">
+
+            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:orientation="horizontal" android:gravity="center_vertical"
+                android:padding="16dp">
+                <TextView android:layout_width="0dp" android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Version" android:textSize="15sp" android:textColor="@color/text_primary" />
+                <TextView android:id="@+id/tvVersion"
+                    android:layout_width="wrap_content" android:layout_height="wrap_content"
+                    android:text="1.0.0" android:textSize="14sp" android:textColor="@color/text_muted" />
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <!-- 8-8-8 Philosophy card -->
+        <com.google.android.material.card.MaterialCardView
+            style="@style/CardStyle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="20dp"
+            android:layout_marginEnd="20dp"
+            android:layout_marginBottom="20dp"
+            app:cardBackgroundColor="@color/block_work_surface"
+            app:strokeColor="@color/block_work_dim">
+
+            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:orientation="vertical" android:padding="20dp">
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                    android:text="The 8-8-8 Philosophy" android:textSize="15sp"
+                    android:textColor="@color/text_primary" android:textStyle="bold"
+                    android:layout_marginBottom="8dp" />
+                <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
+                    android:text="Sleep 8 hours. Work 8 hours. Live 8 hours.\n\nA balanced day is not about being perfect — it\'s about being intentional. DayBlocks helps you see how your time is really spent."
+                    android:textSize="13sp" android:textColor="@color/text_secondary"
+                    android:lineSpacingExtra="4dp" />
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+    </LinearLayout>
+</androidx.core.widget.NestedScrollView>

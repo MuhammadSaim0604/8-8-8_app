@@ -1,0 +1,265 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.core.widget.NestedScrollView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/background"
+    android:clipToPadding="false"
+    android:paddingBottom="160dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <!-- Header -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:paddingStart="20dp"
+            android:paddingEnd="20dp"
+            android:paddingTop="56dp"
+            android:paddingBottom="20dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Statistics"
+                android:textSize="26sp"
+                android:textColor="@color/text_primary"
+                android:textStyle="bold" />
+        </LinearLayout>
+
+        <!-- Empty state -->
+        <LinearLayout
+            android:id="@+id/llStatsEmpty"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:gravity="center"
+            android:padding="40dp"
+            android:visibility="gone">
+
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:text="📊" android:textSize="56sp" />
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:text="No sessions yet"
+                android:textSize="18sp" android:textColor="@color/text_primary"
+                android:textStyle="bold" android:layout_marginTop="16dp" />
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:text="Start tracking a task to see your stats here"
+                android:textSize="14sp" android:textColor="@color/text_muted"
+                android:layout_marginTop="8dp" android:gravity="center" />
+        </LinearLayout>
+
+        <!-- Summary Cards Row -->
+        <LinearLayout
+            android:id="@+id/llSummaryCards"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:paddingStart="20dp"
+            android:paddingEnd="20dp"
+            android:paddingBottom="16dp"
+            android:weightSum="3">
+
+            <include android:id="@+id/cardStreak" layout="@layout/view_summary_card"
+                android:layout_width="0dp" android:layout_height="wrap_content"
+                android:layout_weight="1" android:layout_marginEnd="6dp" />
+
+            <include android:id="@+id/cardTotalTracked" layout="@layout/view_summary_card"
+                android:layout_width="0dp" android:layout_height="wrap_content"
+                android:layout_weight="1" android:layout_marginStart="3dp" android:layout_marginEnd="3dp" />
+
+            <include android:id="@+id/cardSessions" layout="@layout/view_summary_card"
+                android:layout_width="0dp" android:layout_height="wrap_content"
+                android:layout_weight="1" android:layout_marginStart="6dp" />
+        </LinearLayout>
+
+        <!-- Today's Usage -->
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/cardTodayUsage"
+            style="@style/CardStyle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="20dp"
+            android:layout_marginEnd="20dp"
+            android:layout_marginBottom="16dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="16dp">
+
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                    android:text="Today's Usage"
+                    android:textSize="14sp" android:textColor="@color/text_primary"
+                    android:textStyle="bold" android:layout_marginBottom="14dp" />
+
+                <!-- Sleep row -->
+                <LinearLayout android:id="@+id/rowSleepUsage"
+                    android:layout_width="match_parent" android:layout_height="wrap_content"
+                    android:orientation="horizontal" android:gravity="center_vertical"
+                    android:layout_marginBottom="12dp">
+                    <TextView android:layout_width="24dp" android:layout_height="wrap_content"
+                        android:text="🌙" android:textSize="18sp" />
+                    <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content"
+                        android:layout_weight="1" android:orientation="vertical"
+                        android:layout_marginStart="10dp">
+                        <View android:id="@+id/pbSleep"
+                            android:layout_width="match_parent" android:layout_height="4dp"
+                            android:background="@drawable/bg_progress_sleep" />
+                    </LinearLayout>
+                    <TextView android:id="@+id/tvSleepTime"
+                        android:layout_width="60dp" android:layout_height="wrap_content"
+                        android:textSize="12sp" android:textColor="@color/block_sleep"
+                        android:gravity="end" tools:text="0m" />
+                </LinearLayout>
+
+                <!-- Work row -->
+                <LinearLayout android:id="@+id/rowWorkUsage"
+                    android:layout_width="match_parent" android:layout_height="wrap_content"
+                    android:orientation="horizontal" android:gravity="center_vertical"
+                    android:layout_marginBottom="12dp">
+                    <TextView android:layout_width="24dp" android:layout_height="wrap_content"
+                        android:text="💼" android:textSize="18sp" />
+                    <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content"
+                        android:layout_weight="1" android:orientation="vertical"
+                        android:layout_marginStart="10dp">
+                        <View android:id="@+id/pbWork"
+                            android:layout_width="match_parent" android:layout_height="4dp"
+                            android:background="@drawable/bg_progress_work" />
+                    </LinearLayout>
+                    <TextView android:id="@+id/tvWorkTime"
+                        android:layout_width="60dp" android:layout_height="wrap_content"
+                        android:textSize="12sp" android:textColor="@color/block_work"
+                        android:gravity="end" tools:text="0m" />
+                </LinearLayout>
+
+                <!-- Personal row -->
+                <LinearLayout android:id="@+id/rowPersonalUsage"
+                    android:layout_width="match_parent" android:layout_height="wrap_content"
+                    android:orientation="horizontal" android:gravity="center_vertical">
+                    <TextView android:layout_width="24dp" android:layout_height="wrap_content"
+                        android:text="🧘" android:textSize="18sp" />
+                    <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content"
+                        android:layout_weight="1" android:orientation="vertical"
+                        android:layout_marginStart="10dp">
+                        <View android:id="@+id/pbPersonal"
+                            android:layout_width="match_parent" android:layout_height="4dp"
+                            android:background="@drawable/bg_progress_personal" />
+                    </LinearLayout>
+                    <TextView android:id="@+id/tvPersonalTime"
+                        android:layout_width="60dp" android:layout_height="wrap_content"
+                        android:textSize="12sp" android:textColor="@color/block_personal"
+                        android:gravity="end" tools:text="0m" />
+                </LinearLayout>
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <!-- Weekly chart -->
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/cardWeekly"
+            style="@style/CardStyle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="20dp"
+            android:layout_marginEnd="20dp"
+            android:layout_marginBottom="16dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="16dp">
+
+                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                    android:orientation="horizontal" android:gravity="center_vertical"
+                    android:layout_marginBottom="16dp">
+                    <TextView android:layout_width="0dp" android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="This Week"
+                        android:textSize="14sp" android:textColor="@color/text_primary"
+                        android:textStyle="bold" />
+                    <TextView android:id="@+id/tvWeekTotal"
+                        android:layout_width="wrap_content" android:layout_height="wrap_content"
+                        android:textSize="12sp" android:textColor="@color/text_muted"
+                        tools:text="14h 30m total" />
+                </LinearLayout>
+
+                <!-- Bar chart container -->
+                <LinearLayout
+                    android:id="@+id/llBarChart"
+                    android:layout_width="match_parent"
+                    android:layout_height="120dp"
+                    android:orientation="horizontal"
+                    android:weightSum="7"
+                    android:gravity="bottom" />
+
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <!-- Most Tracked -->
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/cardTopTasks"
+            style="@style/CardStyle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="20dp"
+            android:layout_marginEnd="20dp"
+            android:layout_marginBottom="16dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="16dp">
+
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                    android:text="Most Tracked"
+                    android:textSize="14sp" android:textColor="@color/text_primary"
+                    android:textStyle="bold" android:layout_marginBottom="12dp" />
+
+                <LinearLayout
+                    android:id="@+id/llTopTasks"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical" />
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <!-- Recent Sessions -->
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/cardRecent"
+            style="@style/CardStyle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="20dp"
+            android:layout_marginEnd="20dp"
+            android:layout_marginBottom="16dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="16dp">
+
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                    android:text="Recent Sessions"
+                    android:textSize="14sp" android:textColor="@color/text_primary"
+                    android:textStyle="bold" android:layout_marginBottom="12dp" />
+
+                <LinearLayout
+                    android:id="@+id/llRecentSessions"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical" />
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+    </LinearLayout>
+</androidx.core.widget.NestedScrollView>

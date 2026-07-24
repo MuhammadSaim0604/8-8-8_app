@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">DayBlocks</string>
+    <string name="app_tagline">Your day. Your time. Your rules.</string>
+
+    <!-- Blocks -->
+    <string name="block_sleep">Sleep</string>
+    <string name="block_work">Work</string>
+    <string name="block_personal">Personal</string>
+    <string name="block_sleep_sub">Rest &amp; Recovery</string>
+    <string name="block_work_sub">Work &amp; Learning</string>
+    <string name="block_personal_sub">Personal Life</string>
+    <string name="block_8h">8h Block</string>
+
+    <!-- Nav -->
+    <string name="nav_home">Home</string>
+    <string name="nav_tasks">Tasks</string>
+    <string name="nav_stats">Stats</string>
+    <string name="nav_settings">Settings</string>
+
+    <!-- Home -->
+    <string name="greeting_morning">Good Morning ☀️</string>
+    <string name="greeting_afternoon">Good Afternoon 🌤</string>
+    <string name="greeting_evening">Good Evening 🌆</string>
+    <string name="greeting_night">Good Night 🌙</string>
+    <string name="badge_888">24h / 888</string>
+    <string name="label_tasks">Tasks</string>
+    <string name="label_planned">Planned</string>
+    <string name="label_unplanned">Unplanned</string>
+    <string name="label_now_tracking">Now Tracking</string>
+    <string name="tip_add_first">Tap a block to add your first task and start planning your day.</string>
+
+    <!-- Task -->
+    <string name="add_task">Add Task</string>
+    <string name="edit_task">Edit Task</string>
+    <string name="delete_task">Delete Task</string>
+    <string name="task_name_hint">e.g. Deep Work, Evening Run…</string>
+    <string name="save">Save</string>
+    <string name="cancel">Cancel</string>
+    <string name="delete">Delete</string>
+    <string name="switch_task">Switch Task</string>
+    <string name="free_up_time">Free Up Time</string>
+
+    <!-- Timer -->
+    <string name="elapsed">Elapsed</string>
+    <string name="remaining">Remaining</string>
+    <string name="overtime">Overtime</string>
+    <string name="complete">Complete</string>
+    <string name="budgeted">Budgeted</string>
+    <string name="now_tracking">Now Tracking</string>
+    <string name="hint_running">Pause to save progress · Stop to end session</string>
+    <string name="hint_paused">Tap play to resume</string>
+    <string name="past_budgeted">Past budgeted time ⚠</string>
+
+    <!-- Stats -->
+    <string name="day_streak">Day Streak 🔥</string>
+    <string name="total_tracked">Total Tracked</string>
+    <string name="sessions">Sessions</string>
+    <string name="this_week">This Week</string>
+    <string name="most_tracked">Most Tracked</string>
+    <string name="recent_sessions">Recent Sessions</string>
+    <string name="todays_usage">Today\'s Usage</string>
+
+    <!-- Settings -->
+    <string name="permissions">Permissions</string>
+    <string name="notifications">Notifications</string>
+    <string name="notification_desc">Live timer in notification bar</string>
+    <string name="overlay_permission">Display Over Other Apps</string>
+    <string name="overlay_desc">Floating timer bubble</string>
+    <string name="daily_reset">Daily Reset</string>
+    <string name="reset_time">12:00 AM / Midnight</string>
+    <string name="data_privacy">Data &amp; Privacy</string>
+    <string name="clear_history">Clear History</string>
+    <string name="clear_history_desc">Deletes all sessions and stats. Tasks are kept.</string>
+    <string name="reset_everything">Reset Everything</string>
+    <string name="reset_desc">Deletes all tasks, history, and settings.</string>
+    <string name="confirm">Confirm</string>
+    <string name="about">About</string>
+    <string name="version">Version</string>
+
+    <!-- Notification -->
+    <string name="notif_idle_title">DayBlocks</string>
+    <string name="notif_idle_body">8-8-8 Dashboard · tap to open</string>
+    <string name="action_pause">Pause</string>
+    <string name="action_resume">Resume</string>
+    <string name="action_stop">Stop</string>
+    <string name="action_hide_bubble">Hide Bubble</string>
+    <string name="action_show_bubble">Show Bubble</string>
+
+    <!-- Errors -->
+    <string name="err_name_empty">Please enter a task name</string>
+    <string name="err_duration_zero">Duration must be at least 1 minute</string>
+    <string name="err_duration_max">Maximum task duration is 7h 59m</string>
+    <string name="err_block_full">Block is full. Free up some time first.</string>
+
+    <!-- Misc -->
+    <string name="enabled">Enabled</string>
+    <string name="disabled">Disabled</string>
+    <string name="allow">Allow</string>
+    <string name="open_settings">Settings</string>
+    <string name="no_tasks">No tasks yet</string>
+    <string name="no_history">No sessions yet. Start tracking!</string>
+    <string name="block_full">Block full ⚠</string>
+    <string name="hours_format">%1$dh %2$dm</string>
+    <string name="minutes_format">%1$dm</string>
+    <string name="tasks_planned">%1$d tasks planned</string>
+    <string name="tasks_count">%1$d tasks</string>
+    <string name="free_minutes">%1$dm free</string>
+</resources>

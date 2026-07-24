@@ -1,0 +1,146 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:background="@color/card"
+    android:paddingBottom="32dp">
+
+    <!-- Handle -->
+    <View android:layout_width="40dp" android:layout_height="4dp"
+        android:background="@drawable/bg_handle"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginTop="12dp" android:layout_marginBottom="4dp" />
+
+    <!-- Title -->
+    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+        android:orientation="horizontal" android:gravity="center_vertical"
+        android:paddingStart="20dp" android:paddingEnd="12dp" android:paddingTop="8dp"
+        android:paddingBottom="16dp">
+
+        <TextView android:id="@+id/tvSheetTitle"
+            android:layout_width="0dp" android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Add Task" android:textSize="18sp"
+            android:textColor="@color/text_primary" android:textStyle="bold" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnClose"
+            style="@style/Widget.Material3.Button.IconButton"
+            android:layout_width="40dp" android:layout_height="40dp"
+            app:icon="@drawable/ic_close" app:iconTint="@color/text_muted" />
+    </LinearLayout>
+
+    <!-- Task Name -->
+    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+        android:text="TASK NAME" android:textSize="11sp" android:textColor="@color/text_muted"
+        android:letterSpacing="0.1" android:paddingStart="20dp" android:paddingBottom="8dp" />
+
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/tilTaskName"
+        style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="20dp"
+        android:layout_marginEnd="20dp"
+        android:layout_marginBottom="20dp"
+        app:boxStrokeColor="@color/accent_blue"
+        app:hintTextColor="@color/text_muted">
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/etTaskName"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textColor="@color/text_primary"
+            android:hint="e.g. Deep Work, Evening Run…"
+            android:imeOptions="actionNext"
+            android:inputType="textCapSentences" />
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <!-- Duration -->
+    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+        android:orientation="horizontal" android:gravity="center_vertical"
+        android:paddingStart="20dp" android:paddingEnd="20dp" android:paddingBottom="8dp">
+        <TextView android:layout_width="0dp" android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="DURATION" android:textSize="11sp" android:textColor="@color/text_muted"
+            android:letterSpacing="0.1" />
+        <TextView android:id="@+id/tvDurationBadge"
+            android:layout_width="wrap_content" android:layout_height="wrap_content"
+            android:textSize="12sp" android:textColor="@color/success"
+            android:paddingStart="10dp" android:paddingEnd="10dp"
+            android:paddingTop="4dp" android:paddingBottom="4dp"
+            android:background="@drawable/bg_badge_green"
+            tools:text="120m free" />
+    </LinearLayout>
+
+    <!-- Duration pickers row -->
+    <LinearLayout android:layout_width="match_parent" android:layout_height="120dp"
+        android:orientation="horizontal" android:gravity="center"
+        android:paddingStart="20dp" android:paddingEnd="20dp" android:paddingBottom="8dp">
+
+        <NumberPicker android:id="@+id/pickerHours"
+            android:layout_width="0dp" android:layout_height="match_parent"
+            android:layout_weight="2" />
+
+        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+            android:text="h" android:textSize="20sp" android:textColor="@color/text_secondary"
+            android:paddingStart="8dp" android:paddingEnd="16dp" />
+
+        <NumberPicker android:id="@+id/pickerMinutes"
+            android:layout_width="0dp" android:layout_height="match_parent"
+            android:layout_weight="2" />
+
+        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+            android:text="m" android:textSize="20sp" android:textColor="@color/text_secondary"
+            android:paddingStart="8dp" />
+    </LinearLayout>
+
+    <TextView android:id="@+id/tvDurationSummary"
+        android:layout_width="wrap_content" android:layout_height="wrap_content"
+        android:paddingStart="20dp" android:paddingBottom="4dp"
+        android:textSize="12sp" android:textColor="@color/text_muted"
+        tools:text="1h 30m · 90 min total" />
+    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+        android:paddingStart="20dp" android:paddingBottom="20dp"
+        android:text="Max 7h 59m per task (under 8 hours)"
+        android:textSize="11sp" android:textColor="@color/text_disabled" />
+
+    <!-- Color -->
+    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+        android:text="COLOR" android:textSize="11sp" android:textColor="@color/text_muted"
+        android:letterSpacing="0.1" android:paddingStart="20dp" android:paddingBottom="10dp" />
+
+    <com.google.android.material.chip.ChipGroup
+        android:id="@+id/colorChipGroup"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingStart="16dp"
+        android:paddingEnd="16dp"
+        android:paddingBottom="20dp"
+        app:singleSelection="true" />
+
+    <!-- Error -->
+    <TextView android:id="@+id/tvError"
+        android:layout_width="wrap_content" android:layout_height="wrap_content"
+        android:paddingStart="20dp" android:paddingBottom="12dp"
+        android:textSize="13sp" android:textColor="@color/danger"
+        android:visibility="gone"
+        tools:text="Please enter a task name" />
+
+    <!-- Save button -->
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btnSave"
+        style="@style/ButtonStyle"
+        android:layout_width="match_parent"
+        android:layout_height="52dp"
+        android:layout_marginStart="20dp"
+        android:layout_marginEnd="20dp"
+        android:text="Save Task"
+        android:textSize="15sp"
+        android:textStyle="bold" />
+
+</LinearLayout>
