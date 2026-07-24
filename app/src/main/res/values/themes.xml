@@ -23,9 +23,6 @@
         <item name="android:background">@color/nav_background</item>
         <item name="itemIconTint">@color/nav_item_color</item>
         <item name="itemTextColor">@color/nav_item_color</item>
-        <item name="itemActiveIndicatorColor">@color/accent_blue_dim</item>
-        <item name="itemActiveIndicatorHeight">40dp</item>
-        <item name="itemActiveIndicatorWidth">64dp</item>
         <item name="itemPaddingTop">10dp</item>
         <item name="itemPaddingBottom">10dp</item>
         <item name="elevation">16dp</item>
