@@ -60,14 +60,11 @@ class FloatingBubbleService : LifecycleService() {
         super.onStartCommand(intent, flags, startId)
         intent?.let { parseIntent(it) }
         updateNotification()
-        if (isRunning && Settings.canDrawOverlays(this) && !bubbleHidden) {
+        if (Settings.canDrawOverlays(this) && !bubbleHidden) {
             if (bubbleView == null) createBubble()
             else updateBubbleContent()
-            startTicking()
-        } else if (!isRunning) {
-            removeBubble()
-            stopTicking()
         }
+        if (isRunning) startTicking() else stopTicking()
         return START_STICKY
     }
 
@@ -198,7 +195,7 @@ class FloatingBubbleService : LifecycleService() {
     }
 
     private fun showBubbleView() {
-        if (bubbleView == null && isRunning) createBubble()
+        if (bubbleView == null) createBubble()
         else bubbleView?.visibility = View.VISIBLE
     }
 
