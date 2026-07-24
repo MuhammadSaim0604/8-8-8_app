@@ -107,46 +107,48 @@ class MainActivity : AppCompatActivity() {
                 val elapsed = vm.elapsedMsFor(ts.taskId)
                 val budgetMs = task.durationMinutes * 60_000L
 
+                val mp = binding.miniPlayer
+
                 // Task name & block info
-                binding.tvMiniTaskName.text = task.name
-                binding.tvMiniBlock.text = task.block.label
-                binding.tvMiniElapsed.text = fmtElapsed(elapsed)
+                mp.tvMiniTaskName.text = task.name
+                mp.tvMiniBlock.text = task.block.label
+                mp.tvMiniElapsed.text = fmtElapsed(elapsed)
 
                 // Pause/resume button icon
                 val isRunning = vm.isRunning(ts.taskId)
-                binding.btnMiniPause.setIconResource(
+                mp.btnMiniPause.setIconResource(
                     if (isRunning) R.drawable.ic_pause else R.drawable.ic_play
                 )
 
                 // Progress bar width
                 val pct = (elapsed.toFloat() / budgetMs.coerceAtLeast(1)).coerceIn(0f, 1f)
-                binding.miniPlayerProgress.post {
-                    val parentW = (binding.miniPlayerProgress.parent as? ViewGroup)?.width ?: 0
+                mp.miniPlayerProgress.post {
+                    val parentW = (mp.miniPlayerProgress.parent as? ViewGroup)?.width ?: 0
                     if (parentW > 0) {
-                        binding.miniPlayerProgress.layoutParams.width = (parentW * pct).toInt()
-                        binding.miniPlayerProgress.requestLayout()
+                        mp.miniPlayerProgress.layoutParams.width = (parentW * pct).toInt()
+                        mp.miniPlayerProgress.requestLayout()
                     }
                 }
 
                 // Color the dot and progress with task color
                 try {
                     val color = android.graphics.Color.parseColor(task.colorHex)
-                    binding.miniDot.setBackgroundColor(color)
-                    binding.miniPlayerProgress.setBackgroundColor(color)
-                    binding.tvMiniElapsed.setTextColor(color)
+                    mp.miniDot.setBackgroundColor(color)
+                    mp.miniPlayerProgress.setBackgroundColor(color)
+                    mp.tvMiniElapsed.setTextColor(color)
                 } catch (_: Exception) {}
             }
         }
 
         // Tap card body → navigate to running task
-        binding.miniPlayerCard.setOnClickListener {
+        binding.miniPlayer.miniPlayerCard.setOnClickListener {
             try {
                 navController.navigate(R.id.action_global_runningTask)
             } catch (_: Exception) {}
         }
 
         // Pause / Resume button
-        binding.btnMiniPause.setOnClickListener {
+        binding.miniPlayer.btnMiniPause.setOnClickListener {
             val ts = vm.timerState.value
             if (ts != null) {
                 if (vm.isRunning(ts.taskId)) vm.pauseTask()
@@ -155,7 +157,7 @@ class MainActivity : AppCompatActivity() {
         }
 
         // Stop button
-        binding.btnMiniStop.setOnClickListener {
+        binding.miniPlayer.btnMiniStop.setOnClickListener {
             vm.stopTask()
         }
     }

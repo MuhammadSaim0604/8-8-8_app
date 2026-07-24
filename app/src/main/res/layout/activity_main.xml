@@ -27,7 +27,9 @@
         android:alpha="0"
         android:translationY="200dp">
 
-        <include layout="@layout/layout_mini_player" />
+        <include
+            android:id="@+id/miniPlayer"
+            layout="@layout/layout_mini_player" />
     </FrameLayout>
 
     <!-- Global FAB — always visible on tab screens, opens QuickMenuSheet -->

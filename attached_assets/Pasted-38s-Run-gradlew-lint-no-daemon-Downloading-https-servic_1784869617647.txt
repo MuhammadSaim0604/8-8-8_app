@@ -1,0 +1,68 @@
+38s
+Run ./gradlew lint --no-daemon
+Downloading https://services.gradle.org/distributions/gradle-8.4-bin.zip
+............10%............20%.............30%............40%.............50%............60%.............70%............80%.............90%............100%
+To honour the JVM settings for this build a single-use Daemon process will be forked. For more on this, please refer to https://docs.gradle.org/8.4/userguide/gradle_daemon.html#sec:disabling_the_daemon in the Gradle documentation.
+Daemon will be stopped at the end of the build 
+> Task :app:checkKotlinGradlePluginConfigurationErrors
+> Task :app:preBuild UP-TO-DATE
+> Task :app:preDebugBuild UP-TO-DATE
+> Task :app:dataBindingMergeDependencyArtifactsDebug
+> Task :app:generateDebugResValues FROM-CACHE
+> Task :app:generateDebugResources
+> Task :app:packageDebugResources
+> Task :app:mergeDebugResources
+> Task :app:generateDebugBuildConfig FROM-CACHE
+> Task :app:checkDebugAarMetadata
+> Task :app:mapDebugSourceSetPaths
+> Task :app:createDebugCompatibleScreenManifests
+> Task :app:parseDebugLocalResources
+> Task :app:extractDeepLinksDebug
+> Task :app:dataBindingGenBaseClassesDebug
+> Task :app:processDebugMainManifest FROM-CACHE
+> Task :app:processDebugManifest FROM-CACHE
+> Task :app:processDebugManifestForPackage FROM-CACHE
+> Task :app:javaPreCompileDebug FROM-CACHE
+> Task :app:preDebugAndroidTestBuild SKIPPED
+> Task :app:generateDebugAndroidTestResValues FROM-CACHE
+> Task :app:extractProguardFiles
+> Task :app:preDebugUnitTestBuild UP-TO-DATE
+> Task :app:processDebugResources
+> Task :app:kspDebugKotlin
+
+e: file:///home/runner/work/8-8-8_app/8-8-8_app/app/src/main/java/com/dayblocks/app/MainActivity.kt:111:25 Unresolved reference: tvMiniTaskName
+e: file:///home/runner/work/8-8-8_app/8-8-8_app/app/src/main/java/com/dayblocks/app/MainActivity.kt:111:40 Variable expected
+> Task :app:compileDebugKotlin FAILED
+e: file:///home/runner/work/8-8-8_app/8-8-8_app/app/src/main/java/com/dayblocks/app/MainActivity.kt:112:25 Unresolved reference: tvMiniBlock
+e: file:///home/runner/work/8-8-8_app/8-8-8_app/app/src/main/java/com/dayblocks/app/MainActivity.kt:112:37 Variable expected
+e: file:///home/runner/work/8-8-8_app/8-8-8_app/app/src/main/java/com/dayblocks/app/MainActivity.kt:113:25 Unresolved reference: tvMiniElapsed
+e: file:///home/runner/work/8-8-8_app/8-8-8_app/app/src/main/java/com/dayblocks/app/MainActivity.kt:113:39 Variable expected
+e: file:///home/runner/work/8-8-8_app/8-8-8_app/app/src/main/java/com/dayblocks/app/MainActivity.kt:117:25 Unresolved reference: btnMiniPause
+e: file:///home/runner/work/8-8-8_app/8-8-8_app/app/src/main/java/com/dayblocks/app/MainActivity.kt:123:25 Unresolved reference: miniPlayerProgress
+e: file:///home/runner/work/8-8-8_app/8-8-8_app/app/src/main/java/com/dayblocks/app/MainActivity.kt:124:44 Unresolved reference: miniPlayerProgress
+e: file:///home/runner/work/8-8-8_app/8-8-8_app/app/src/main/java/com/dayblocks/app/MainActivity.kt:126:33 Unresolved reference: miniPlayerProgress
+e: file:///home/runner/work/8-8-8_app/8-8-8_app/app/src/main/java/com/dayblocks/app/MainActivity.kt:126:65 Variable expected
+e: file:///home/runner/work/8-8-8_app/8-8-8_app/app/src/main/java/com/dayblocks/app/MainActivity.kt:127:33 Unresolved reference: miniPlayerProgress
+e: file:///home/runner/work/8-8-8_app/8-8-8_app/app/src/main/java/com/dayblocks/app/MainActivity.kt:134:29 Unresolved reference: miniDot
+e: file:///home/runner/work/8-8-8_app/8-8-8_app/app/src/main/java/com/dayblocks/app/MainActivity.kt:135:29 Unresolved reference: miniPlayerProgress
+e: file:///home/runner/work/8-8-8_app/8-8-8_app/app/src/main/java/com/dayblocks/app/MainActivity.kt:136:29 Unresolved reference: tvMiniElapsed
+e: file:///home/runner/work/8-8-8_app/8-8-8_app/app/src/main/java/com/dayblocks/app/MainActivity.kt:142:17 Unresolved reference: miniPlayerCard
+e: file:///home/runner/work/8-8-8_app/8-8-8_app/app/src/main/java/com/dayblocks/app/MainActivity.kt:149:17 Unresolved reference: btnMiniPause
+e: file:///home/runner/work/8-8-8_app/8-8-8_app/app/src/main/java/com/dayblocks/app/MainActivity.kt:158:17 Unresolved reference: btnMiniStop
+
+FAILURE: Build failed with an exception.
+22 actionable tasks: 15 executed, 7 from cache
+
+* What went wrong:
+Execution failed for task ':app:compileDebugKotlin'.
+> A failure occurred while executing org.jetbrains.kotlin.compilerRunner.GradleCompilerRunnerWithWorkers$GradleKotlinCompilerWorkAction
+   > Compilation error. See log for more details
+
+* Try:
+> Run with --stacktrace option to get the stack trace.
+> Run with --info or --debug option to get more log output.
+> Run with --scan to get full insights.
+> Get more help at https://help.gradle.org.
+
+BUILD FAILED in 37s
+Error: Process completed with exit code 1.
