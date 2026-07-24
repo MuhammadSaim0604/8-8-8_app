@@ -26,6 +26,25 @@
         <item name="elevation">16dp</item>
     </style>
 
+    <!-- Named button styles referenced from layout files -->
+    <style name="Widget.App.Button.Primary" parent="Widget.Material3.Button">
+        <item name="android:textColor">@color/text_primary</item>
+        <item name="backgroundTint">@color/accent_blue</item>
+        <item name="cornerRadius">12dp</item>
+    </style>
+
+    <style name="Widget.App.Button.Secondary" parent="Widget.Material3.Button.OutlinedButton">
+        <item name="android:textColor">@color/text_secondary</item>
+        <item name="strokeColor">@color/divider</item>
+        <item name="cornerRadius">12dp</item>
+    </style>
+
+    <style name="Widget.App.Button.Danger" parent="Widget.Material3.Button">
+        <item name="android:textColor">@color/danger</item>
+        <item name="backgroundTint">@color/danger_surface</item>
+        <item name="cornerRadius">12dp</item>
+    </style>
+
     <style name="ButtonStyle" parent="Widget.Material3.Button">
         <item name="android:textColor">@color/text_primary</item>
         <item name="backgroundTint">@color/accent_blue</item>
