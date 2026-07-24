@@ -1,5 +1,6 @@
 package com.dayblocks.app
 
+import android.content.Intent
 import android.os.Bundle
 import android.view.View
 import android.view.ViewGroup
@@ -22,14 +23,6 @@ class MainActivity : AppCompatActivity() {
     private lateinit var navController: NavController
     val vm: MainViewModel by viewModels()
 
-    // Tab destination IDs — FAB is visible only on these screens
-    private val tabDestinations = setOf(
-        R.id.homeFragment,
-        R.id.tasksFragment,
-        R.id.statsFragment,
-        R.id.settingsFragment
-    )
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         WindowCompat.setDecorFitsSystemWindows(window, false)
@@ -40,9 +33,30 @@ class MainActivity : AppCompatActivity() {
         setContentView(binding.root)
 
         setupNavigation()
-        setupFab()
         setupMiniPlayer()
         startBubbleService()
+
+        // Bubble tap → open QuickMenuSheet
+        if (intent?.getBooleanExtra(App.EXTRA_OPEN_QUICK_MENU, false) == true) {
+            openQuickMenu()
+        }
+    }
+
+    // Called when the app is already running and receives a new intent (FLAG_ACTIVITY_SINGLE_TOP)
+    override fun onNewIntent(intent: Intent?) {
+        super.onNewIntent(intent)
+        if (intent?.getBooleanExtra(App.EXTRA_OPEN_QUICK_MENU, false) == true) {
+            openQuickMenu()
+        }
+    }
+
+    private fun openQuickMenu() {
+        // Post to avoid race with fragment manager transactions on cold start
+        binding.root.post {
+            if (!supportFragmentManager.isStateSaved) {
+                QuickMenuSheet().show(supportFragmentManager, "quick_menu")
+            }
+        }
     }
 
     private fun setupNavigation() {
@@ -53,18 +67,8 @@ class MainActivity : AppCompatActivity() {
         binding.bottomNav.setupWithNavController(navController)
 
         navController.addOnDestinationChangedListener { _, dest, _ ->
-            val isTab = dest.id in tabDestinations
             val isRunning = dest.id == R.id.runningTaskFragment
-
-            // Hide bottom nav on running task screen
             binding.bottomNav.visibility = if (isRunning) View.GONE else View.VISIBLE
-
-            // FAB only visible on tab screens
-            if (isTab) {
-                binding.fabQuickMenu.show()
-            } else {
-                binding.fabQuickMenu.hide()
-            }
 
             // Hide mini player on running task screen
             if (isRunning) {
@@ -73,14 +77,8 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun setupFab() {
-        binding.fabQuickMenu.setOnClickListener {
-            QuickMenuSheet().show(supportFragmentManager, "quick_menu")
-        }
-    }
-
     private fun setupMiniPlayer() {
-        // Show/hide mini player based on timer state and update content
+        // Show/hide mini player based on timer state
         lifecycleScope.launch {
             vm.timerState.collectLatest { ts ->
                 val isRunningTaskScreen =
@@ -99,28 +97,24 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
-        // Update mini player content every tick (elapsed time, progress bar)
+        // Update mini player content every tick
         lifecycleScope.launch {
             vm.nowMs.collectLatest { _ ->
                 val ts = vm.timerState.value ?: return@collectLatest
                 val task = vm.tasks.value.find { it.id == ts.taskId } ?: return@collectLatest
                 val elapsed = vm.elapsedMsFor(ts.taskId)
                 val budgetMs = task.durationMinutes * 60_000L
-
                 val mp = binding.miniPlayer
 
-                // Task name & block info
                 mp.tvMiniTaskName.text = task.name
                 mp.tvMiniBlock.text = task.block.label
                 mp.tvMiniElapsed.text = fmtElapsed(elapsed)
 
-                // Pause/resume button icon
                 val isRunning = vm.isRunning(ts.taskId)
                 mp.btnMiniPause.setIconResource(
                     if (isRunning) R.drawable.ic_pause else R.drawable.ic_play
                 )
 
-                // Progress bar width
                 val pct = (elapsed.toFloat() / budgetMs.coerceAtLeast(1)).coerceIn(0f, 1f)
                 mp.miniPlayerProgress.post {
                     val parentW = (mp.miniPlayerProgress.parent as? ViewGroup)?.width ?: 0
@@ -130,7 +124,6 @@ class MainActivity : AppCompatActivity() {
                     }
                 }
 
-                // Color the dot and progress with task color
                 try {
                     val color = android.graphics.Color.parseColor(task.colorHex)
                     mp.miniDot.setBackgroundColor(color)
@@ -140,14 +133,12 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
-        // Tap card body → navigate to running task
+        // Tap card body → navigate to Running Task screen
         binding.miniPlayer.miniPlayerCard.setOnClickListener {
-            try {
-                navController.navigate(R.id.action_global_runningTask)
-            } catch (_: Exception) {}
+            try { navController.navigate(R.id.action_global_runningTask) } catch (_: Exception) {}
         }
 
-        // Pause / Resume button
+        // Pause / Resume
         binding.miniPlayer.btnMiniPause.setOnClickListener {
             val ts = vm.timerState.value
             if (ts != null) {
@@ -156,16 +147,14 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
-        // Stop button
+        // Stop
         binding.miniPlayer.btnMiniStop.setOnClickListener {
             vm.stopTask()
         }
     }
 
     private fun startBubbleService() {
-        lifecycleScope.launch {
-            vm.updateBubbleService()
-        }
+        lifecycleScope.launch { vm.updateBubbleService() }
     }
 
     override fun onResume() {

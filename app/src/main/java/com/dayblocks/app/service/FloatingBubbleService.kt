@@ -173,9 +173,10 @@ class FloatingBubbleService : LifecycleService() {
                 }
                 MotionEvent.ACTION_UP -> {
                     if (!isDragging) {
-                        // Tap → open app
+                        // Tap → open app and show QuickMenuSheet
                         val intent = Intent(this, MainActivity::class.java).apply {
                             flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_SINGLE_TOP
+                            putExtra(App.EXTRA_OPEN_QUICK_MENU, true)
                         }
                         startActivity(intent)
                     }

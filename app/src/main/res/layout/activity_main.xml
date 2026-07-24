@@ -32,21 +32,6 @@
             layout="@layout/layout_mini_player" />
     </FrameLayout>
 
-    <!-- Global FAB — always visible on tab screens, opens QuickMenuSheet -->
-    <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:id="@+id/fabQuickMenu"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="bottom|end"
-        android:layout_marginEnd="20dp"
-        android:layout_marginBottom="96dp"
-        android:contentDescription="Quick menu"
-        app:backgroundTint="@color/accent_blue"
-        app:srcCompat="@drawable/ic_grid"
-        app:tint="@color/text_primary"
-        app:elevation="8dp"
-        app:fabSize="normal" />
-
     <!-- Bottom Navigation — Material3 recommended 80dp height -->
     <com.google.android.material.bottomnavigation.BottomNavigationView
         android:id="@+id/bottomNav"
