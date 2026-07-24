@@ -6,6 +6,7 @@ import android.content.Intent
 import com.dayblocks.app.App
 import com.dayblocks.app.data.repository.AppRepository
 import kotlinx.coroutines.*
+import kotlinx.coroutines.flow.firstOrNull
 
 class NotificationActionReceiver : BroadcastReceiver() {
 
@@ -65,7 +66,3 @@ class NotificationActionReceiver : BroadcastReceiver() {
         context.startForegroundService(intent)
     }
 }
-
-// Extension to safely get first value from Flow
-private suspend fun <T> kotlinx.coroutines.flow.Flow<T>.firstOrNull(): T? =
-    runCatching { kotlinx.coroutines.flow.first() }.getOrNull()

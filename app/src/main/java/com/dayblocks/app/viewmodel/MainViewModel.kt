@@ -7,6 +7,7 @@ import android.provider.Settings
 import androidx.lifecycle.*
 import com.dayblocks.app.App
 import com.dayblocks.app.data.model.*
+import com.dayblocks.app.data.model.Block
 import com.dayblocks.app.data.repository.AppRepository
 import com.dayblocks.app.service.FloatingBubbleService
 import kotlinx.coroutines.*
