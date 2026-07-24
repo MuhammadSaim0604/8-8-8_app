@@ -98,4 +98,13 @@
     <style name="TextCaption" parent="TextAppearance.Material3.LabelSmall">
         <item name="android:textColor">@color/text_muted</item>
     </style>
+
+    <!-- Transparent host for system-overlay sheets (e.g. QuickMenuSheet from bubble) -->
+    <style name="Theme.DayBlocks.Transparent" parent="Theme.DayBlocks">
+        <item name="android:windowIsTranslucent">true</item>
+        <item name="android:windowBackground">@android:color/transparent</item>
+        <item name="android:windowNoTitle">true</item>
+        <item name="android:windowAnimationStyle">@null</item>
+        <item name="android:backgroundDimEnabled">true</item>
+    </style>
 </resources>

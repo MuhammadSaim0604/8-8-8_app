@@ -14,6 +14,7 @@ import androidx.lifecycle.lifecycleScope
 import com.dayblocks.app.App
 import com.dayblocks.app.MainActivity
 import com.dayblocks.app.R
+import com.dayblocks.app.ui.quickmenu.QuickMenuActivity
 import kotlinx.coroutines.*
 
 class FloatingBubbleService : LifecycleService() {
@@ -101,6 +102,7 @@ class FloatingBubbleService : LifecycleService() {
         updateBubbleContent()
         setupBubbleDrag(view)
 
+        val screenW = resources.displayMetrics.widthPixels
         val params = WindowManager.LayoutParams(
             WindowManager.LayoutParams.WRAP_CONTENT,
             WindowManager.LayoutParams.WRAP_CONTENT,
@@ -113,8 +115,8 @@ class FloatingBubbleService : LifecycleService() {
                     WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN,
             PixelFormat.TRANSLUCENT
         ).apply {
-            gravity = Gravity.TOP or Gravity.END
-            x = 24; y = 200
+            gravity = Gravity.TOP or Gravity.START
+            x = (screenW * 0.75).toInt(); y = 200
         }
 
         windowManager?.addView(view, params)
@@ -146,16 +148,19 @@ class FloatingBubbleService : LifecycleService() {
     }
 
     private fun setupBubbleDrag(view: View) {
-        var dx = 0f; var dy = 0f
-        var lastX = 0f; var lastY = 0f
+        var initialParamX = 0; var initialParamY = 0
+        var downRawX = 0f;     var downRawY = 0f
+        var lastX = 0f;        var lastY = 0f
         var isDragging = false
 
         view.setOnTouchListener { v, event ->
             when (event.action) {
                 MotionEvent.ACTION_DOWN -> {
-                    dx = (windowManager?.defaultDisplay?.width ?: 0) - event.rawX
-                    dy = event.rawY
-                    lastX = event.rawX; lastY = event.rawY
+                    val params = v.layoutParams as? WindowManager.LayoutParams
+                    initialParamX = params?.x ?: 0
+                    initialParamY = params?.y ?: 0
+                    downRawX = event.rawX; downRawY = event.rawY
+                    lastX = event.rawX;   lastY = event.rawY
                     isDragging = false
                     true
                 }
@@ -165,18 +170,19 @@ class FloatingBubbleService : LifecycleService() {
                     if (moveX > 5 || moveY > 5) isDragging = true
                     val params = v.layoutParams as? WindowManager.LayoutParams
                     params?.let {
-                        it.x = (dx - event.rawX).toInt().coerceAtLeast(0)
-                        it.y = event.rawY.toInt() - 50
+                        it.x = (initialParamX + (event.rawX - downRawX)).toInt()
+                        it.y = (initialParamY + (event.rawY - downRawY)).toInt().coerceAtLeast(0)
                         windowManager?.updateViewLayout(v, it)
                     }
                     true
                 }
                 MotionEvent.ACTION_UP -> {
                     if (!isDragging) {
-                        // Tap → open app and show QuickMenuSheet
-                        val intent = Intent(this, MainActivity::class.java).apply {
-                            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_SINGLE_TOP
-                            putExtra(App.EXTRA_OPEN_QUICK_MENU, true)
+                        // Tap → show QuickMenuSheet as overlay without opening main app
+                        val intent = Intent(this, QuickMenuActivity::class.java).apply {
+                            flags = Intent.FLAG_ACTIVITY_NEW_TASK or
+                                    Intent.FLAG_ACTIVITY_SINGLE_TOP or
+                                    Intent.FLAG_ACTIVITY_NO_ANIMATION
                         }
                         startActivity(intent)
                     }
@@ -265,14 +271,12 @@ class FloatingBubbleService : LifecycleService() {
             }
         }
 
-        // Hide / Show Bubble toggle button
-        if (isRunning || isPaused) {
-            val (bubbleIcon, bubbleLabel, bubbleAction) = if (bubbleHidden)
-                Triple(R.drawable.ic_bubble_show, "Show Bubble", App.ACTION_SHOW_BUBBLE)
-            else
-                Triple(R.drawable.ic_bubble_hide, "Hide Bubble", App.ACTION_HIDE_BUBBLE)
-            builder.addAction(buildAction(bubbleIcon, bubbleLabel, bubbleAction))
-        }
+        // Hide / Show Bubble toggle — always present so user can control visibility at any time
+        val (bubbleIcon, bubbleLabel, bubbleAction) = if (bubbleHidden)
+            Triple(R.drawable.ic_bubble_show, "Show Bubble", App.ACTION_SHOW_BUBBLE)
+        else
+            Triple(R.drawable.ic_bubble_hide, "Hide Bubble", App.ACTION_HIDE_BUBBLE)
+        builder.addAction(buildAction(bubbleIcon, bubbleLabel, bubbleAction))
 
         return builder.build()
     }

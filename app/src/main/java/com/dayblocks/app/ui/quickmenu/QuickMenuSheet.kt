@@ -1,5 +1,6 @@
 package com.dayblocks.app.ui.quickmenu
 
+import android.content.DialogInterface
 import android.graphics.Color
 import android.os.Bundle
 import android.text.Editable
@@ -170,6 +171,12 @@ class QuickMenuSheet : BottomSheetDialogFragment() {
         return if (h > 0) String.format("%d:%02d:%02d", h, m, sec) else String.format("%02d:%02d", m, sec)
     }
     private fun Int.dp() = (this * resources.displayMetrics.density).toInt()
+
+    /** When hosted by QuickMenuActivity (bubble tap), finish the transparent host on dismiss. */
+    override fun onDismiss(dialog: DialogInterface) {
+        super.onDismiss(dialog)
+        (activity as? QuickMenuActivity)?.finish()
+    }
 
     override fun onDestroyView() { super.onDestroyView(); _binding = null }
 }

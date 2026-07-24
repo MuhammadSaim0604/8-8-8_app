@@ -41,6 +41,16 @@
             </intent-filter>
         </activity>
 
+        <!-- Transparent overlay host for QuickMenuSheet (launched from floating bubble) -->
+        <activity
+            android:name=".ui.quickmenu.QuickMenuActivity"
+            android:exported="false"
+            android:launchMode="singleTask"
+            android:theme="@style/Theme.DayBlocks.Transparent"
+            android:screenOrientation="portrait"
+            android:windowSoftInputMode="adjustResize"
+            android:excludeFromRecents="true" />
+
         <!-- Floating Bubble Foreground Service -->
         <service
             android:name=".service.FloatingBubbleService"
