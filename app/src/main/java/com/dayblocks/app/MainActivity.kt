@@ -67,12 +67,20 @@ class MainActivity : AppCompatActivity() {
         binding.bottomNav.setupWithNavController(navController)
 
         navController.addOnDestinationChangedListener { _, dest, _ ->
-            val isRunning = dest.id == R.id.runningTaskFragment
-            binding.bottomNav.visibility = if (isRunning) View.GONE else View.VISIBLE
+            val isRunningTaskScreen = dest.id == R.id.runningTaskFragment
+            binding.bottomNav.visibility = if (isRunningTaskScreen) View.GONE else View.VISIBLE
 
-            // Hide mini player on running task screen
-            if (isRunning) {
+            if (isRunningTaskScreen) {
+                // Hide mini player while on the running task screen
                 binding.miniPlayerContainer.visibility = View.GONE
+            } else if (vm.timerState.value != null) {
+                // Coming back from running task screen — restore mini player if task still running
+                binding.miniPlayerContainer.apply {
+                    alpha = 0f
+                    translationY = 200f
+                    visibility = View.VISIBLE
+                    animate().translationY(0f).alpha(1f).setDuration(300).start()
+                }
             }
         }
     }

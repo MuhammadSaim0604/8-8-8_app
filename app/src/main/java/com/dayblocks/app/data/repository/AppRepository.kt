@@ -18,6 +18,20 @@ class AppRepository(context: Context) {
     private val dateFmt = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
     private fun today() = dateFmt.format(Date())
 
+    /**
+     * Returns the identifier for the current "reset period".
+     * A new period begins every day at 22:00 (10 PM).
+     * If the current time is before 22:00, we are still in the period that started
+     * yesterday at 22:00, so the period key is yesterday's date.
+     */
+    private fun resetPeriod(): String {
+        val cal = Calendar.getInstance()
+        if (cal.get(Calendar.HOUR_OF_DAY) < 22) {
+            cal.add(Calendar.DAY_OF_YEAR, -1)
+        }
+        return dateFmt.format(cal.time)
+    }
+
     // ── Tasks ──────────────────────────────────────────────────────────────────
     val tasksFlow       = taskDao.observeAll()
     fun tasksForBlock(block: Block) = taskDao.observeByBlock(block.name)
@@ -108,13 +122,13 @@ class AppRepository(context: Context) {
     val lastResetDateFlow = prefs.lastResetDateFlow
 
     suspend fun checkAndApplyDailyReset() {
-        val lastReset = prefs.lastResetDateFlow.first()
-        val tod = today()
-        if (lastReset != tod) {
+        val lastReset  = prefs.lastResetDateFlow.first()
+        val period     = resetPeriod()   // changes at 22:00 each day
+        if (lastReset != period) {
             // Stop running timer
             val timer = prefs.timerStateFlow.first()
             if (timer != null) {
-                // Save history for the interrupted task
+                // Save history for the interrupted task using the actual calendar date
                 val elapsed = timer.elapsedMs()
                 if (elapsed >= 5_000L) {
                     val task = taskDao.getById(timer.taskId)
@@ -125,15 +139,15 @@ class AppRepository(context: Context) {
                             blockId   = task.blockId,
                             blockName = task.block.label,
                             elapsedMs = elapsed,
-                            date      = lastReset.ifEmpty { tod }
+                            date      = lastReset.ifEmpty { today() }
                         ))
                     }
                 }
                 prefs.saveTimerState(null)
             }
-            // Clear progress
+            // Clear progress and record the new period
             prefs.saveTaskProgress(emptyMap())
-            prefs.saveLastResetDate(tod)
+            prefs.saveLastResetDate(period)
         }
     }
 

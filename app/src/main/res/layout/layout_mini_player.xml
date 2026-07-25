@@ -21,18 +21,6 @@
         android:layout_height="match_parent"
         android:orientation="vertical">
 
-        <!-- Top progress track + fill -->
-        <FrameLayout
-            android:layout_width="match_parent"
-            android:layout_height="3dp"
-            android:background="@color/track">
-            <View
-                android:id="@+id/miniPlayerProgress"
-                android:layout_width="0dp"
-                android:layout_height="3dp"
-                android:background="@color/accent_blue" />
-        </FrameLayout>
-
         <!-- Content row -->
         <LinearLayout
             android:layout_width="match_parent"
@@ -123,5 +111,18 @@
                 app:iconSize="22dp" />
 
         </LinearLayout>
+
+        <!-- Bottom progress track + fill -->
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="3dp"
+            android:background="@color/track">
+            <View
+                android:id="@+id/miniPlayerProgress"
+                android:layout_width="0dp"
+                android:layout_height="3dp"
+                android:background="@color/accent_blue" />
+        </FrameLayout>
+
     </LinearLayout>
 </com.google.android.material.card.MaterialCardView>

@@ -34,12 +34,22 @@ class FloatingBubbleService : LifecycleService() {
     private var bubbleHidden = false
 
     private var tickJob: Job? = null
+    // Use a dedicated scope so the tick is never paused/cancelled by LifecycleService state changes
+    private val serviceScope = CoroutineScope(Dispatchers.Main + SupervisorJob())
 
     private val actionReceiver = object : BroadcastReceiver() {
         override fun onReceive(ctx: Context, intent: Intent) {
             when (intent.action) {
-                App.ACTION_HIDE_BUBBLE -> { bubbleHidden = true;  hideBubbleView() }
-                App.ACTION_SHOW_BUBBLE -> { bubbleHidden = false; showBubbleView() }
+                App.ACTION_HIDE_BUBBLE -> {
+                    bubbleHidden = true
+                    hideBubbleView()
+                    updateNotification()   // refresh button immediately
+                }
+                App.ACTION_SHOW_BUBBLE -> {
+                    bubbleHidden = false
+                    showBubbleView()
+                    updateNotification()   // refresh button immediately
+                }
             }
         }
     }
@@ -69,6 +79,7 @@ class FloatingBubbleService : LifecycleService() {
     }
 
     override fun onDestroy() {
+        serviceScope.cancel()
         removeBubble()
         stopTicking()
         unregisterReceiver(actionReceiver)
@@ -211,10 +222,10 @@ class FloatingBubbleService : LifecycleService() {
     private fun startTicking() {
         if (tickJob?.isActive == true) return
         val startedAt = System.currentTimeMillis() - elapsedMs
-        tickJob = lifecycleScope.launch {
+        tickJob = serviceScope.launch {
             while (isActive) {
                 elapsedMs = System.currentTimeMillis() - startedAt
-                updateBubbleContent()
+                if (!bubbleHidden) updateBubbleContent()
                 updateNotification()
                 delay(1_000L)
             }

@@ -56,8 +56,13 @@ class QuickMenuSheet : BottomSheetDialogFragment() {
     }
 
     private fun observeState() {
+        // Re-render on every tick (elapsed time updates)
         viewLifecycleOwner.lifecycleScope.launch {
             vm.nowMs.collect { render(binding.etSearch.text?.toString() ?: "") }
+        }
+        // Also re-render when the task list loads/changes (fixes blank list on first open)
+        viewLifecycleOwner.lifecycleScope.launch {
+            vm.tasks.collect { render(binding.etSearch.text?.toString() ?: "") }
         }
     }
 
@@ -146,18 +151,18 @@ class QuickMenuSheet : BottomSheetDialogFragment() {
         }
         card.addView(row1)
 
-        // Progress bar
-        card.addView(ProgressBar(requireContext(), null, android.R.attr.progressBarStyleHorizontal).apply {
-            layoutParams = LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 3.dp()).apply { topMargin = 8.dp() }
-            max = 100; progress = pct
-            try { progressTintList = android.content.res.ColorStateList.valueOf(Color.parseColor(task.colorHex)) } catch (_: Exception) {}
-        })
-
         // Elapsed/total label
         card.addView(TextView(requireContext()).apply {
             text = "${fmtElapsed(elapsed)} / ${fmtMs(budgetMs)}"
             textSize = 11f; setTextColor(Color.parseColor("#66FFFFFF"))
-            layoutParams = LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT).apply { topMargin = 4.dp() }
+            layoutParams = LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT).apply { topMargin = 6.dp() }
+        })
+
+        // Progress bar — at the bottom of the card
+        card.addView(ProgressBar(requireContext(), null, android.R.attr.progressBarStyleHorizontal).apply {
+            layoutParams = LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 3.dp()).apply { topMargin = 6.dp() }
+            max = 100; progress = pct
+            try { progressTintList = android.content.res.ColorStateList.valueOf(Color.parseColor(task.colorHex)) } catch (_: Exception) {}
         })
         return card
     }
