@@ -10,12 +10,17 @@ import android.view.*
 import android.widget.*
 import androidx.core.app.NotificationCompat
 import androidx.lifecycle.LifecycleService
-import androidx.lifecycle.lifecycleScope
 import com.dayblocks.app.App
 import com.dayblocks.app.MainActivity
 import com.dayblocks.app.R
+import com.dayblocks.app.data.db.AppDatabase
+import com.dayblocks.app.data.prefs.AppPrefs
 import com.dayblocks.app.ui.quickmenu.QuickMenuActivity
 import kotlinx.coroutines.*
+import kotlinx.coroutines.flow.firstOrNull
+import java.util.concurrent.Executors
+import java.util.concurrent.ScheduledFuture
+import java.util.concurrent.TimeUnit
 
 class FloatingBubbleService : LifecycleService() {
 
@@ -25,17 +30,28 @@ class FloatingBubbleService : LifecycleService() {
     private var taskLabel: TextView? = null
     private var glowRing: View? = null
 
-    private var taskId    = ""
-    private var taskName  = ""
-    private var blockName = ""
-    private var elapsedMs = 0L
-    private var isRunning = false
-    private var isPaused  = false
-    private var bubbleHidden = false
+    // @Volatile so the executor thread always sees the latest values written by main thread
+    @Volatile private var taskId    = ""
+    @Volatile private var taskName  = ""
+    @Volatile private var blockName = ""
+    @Volatile private var elapsedMs = 0L
+    @Volatile private var isRunning = false
+    @Volatile private var isPaused  = false
+    @Volatile private var bubbleHidden = false
 
-    private var tickJob: Job? = null
-    // Use a dedicated scope so the tick is never paused/cancelled by LifecycleService state changes
-    private val serviceScope = CoroutineScope(Dispatchers.Main + SupervisorJob())
+    // ── Tick infrastructure ────────────────────────────────────────────────────
+    // Use a Java ScheduledExecutorService instead of coroutines: coroutine delay()
+    // on Dispatchers.Main is throttled by Android when the app is in the background,
+    // causing the notification to stop updating after a few seconds.
+    private val executor = Executors.newSingleThreadScheduledExecutor()
+    private var scheduledFuture: ScheduledFuture<*>? = null
+    private var tickStartedAt = 0L
+
+    // For posting view updates back to the main thread from the executor thread
+    private val mainHandler = Handler(Looper.getMainLooper())
+
+    // Coroutine scope for async DataStore reads only (not for the tick)
+    private val serviceScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
 
     private val actionReceiver = object : BroadcastReceiver() {
         override fun onReceive(ctx: Context, intent: Intent) {
@@ -43,12 +59,12 @@ class FloatingBubbleService : LifecycleService() {
                 App.ACTION_HIDE_BUBBLE -> {
                     bubbleHidden = true
                     hideBubbleView()
-                    updateNotification()   // refresh button immediately
+                    updateNotification()
                 }
                 App.ACTION_SHOW_BUBBLE -> {
                     bubbleHidden = false
                     showBubbleView()
-                    updateNotification()   // refresh button immediately
+                    updateNotification()
                 }
             }
         }
@@ -68,20 +84,23 @@ class FloatingBubbleService : LifecycleService() {
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         super.onStartCommand(intent, flags, startId)
-        intent?.let { parseIntent(it) }
-        updateNotification()
-        if (Settings.canDrawOverlays(this) && !bubbleHidden) {
-            if (bubbleView == null) createBubble()
-            else updateBubbleContent()
+
+        if (intent == null) {
+            // Sticky restart after process kill — intent is null, so parseIntent would
+            // leave isRunning=false and kill the tick. Restore state from DataStore instead.
+            restoreStateAndResume()
+            return START_STICKY
         }
-        if (isRunning) startTicking() else stopTicking()
+
+        parseIntent(intent)
+        applyState()
         return START_STICKY
     }
 
     override fun onDestroy() {
+        executor.shutdownNow()
         serviceScope.cancel()
         removeBubble()
-        stopTicking()
         unregisterReceiver(actionReceiver)
         super.onDestroy()
     }
@@ -95,6 +114,50 @@ class FloatingBubbleService : LifecycleService() {
         elapsedMs = intent.getLongExtra(App.EXTRA_ELAPSED_MS, 0L)
         isRunning = intent.getBooleanExtra(App.EXTRA_IS_RUNNING, false)
         isPaused  = intent.getBooleanExtra(App.EXTRA_IS_PAUSED, false)
+    }
+
+    /** Read running task from DataStore (called on sticky restart when intent == null). */
+    private fun restoreStateAndResume() {
+        serviceScope.launch {
+            try {
+                val prefs    = AppPrefs(this@FloatingBubbleService)
+                val timer    = prefs.timerStateFlow.firstOrNull()
+                val progress = prefs.taskProgressFlow.firstOrNull() ?: emptyMap()
+                val hidden   = prefs.bubbleHiddenFlow.firstOrNull() ?: false
+
+                bubbleHidden = hidden
+
+                if (timer != null) {
+                    val task = AppDatabase.getInstance(this@FloatingBubbleService)
+                        .taskDao().getById(timer.taskId)
+                    taskId    = timer.taskId
+                    taskName  = task?.name ?: ""
+                    blockName = task?.block?.label ?: ""
+                    elapsedMs = timer.elapsedMs()
+                    isRunning = true
+                    isPaused  = false
+                } else {
+                    isRunning = false
+                    isPaused  = progress.isNotEmpty()
+                }
+
+                // Apply state on the main thread (view operations must be on main thread)
+                mainHandler.post { applyState() }
+            } catch (_: Exception) {
+                // If restore fails, just show idle notification
+                mainHandler.post { updateNotification() }
+            }
+        }
+    }
+
+    /** Apply current state fields: update notification, bubble, and start/stop ticking. */
+    private fun applyState() {
+        updateNotification()
+        if (Settings.canDrawOverlays(this) && !bubbleHidden) {
+            if (bubbleView == null) createBubble()
+            else updateBubbleContent()
+        }
+        if (isRunning) startTicking() else stopTicking()
     }
 
     // ── Bubble View ────────────────────────────────────────────────────────────
@@ -146,7 +209,6 @@ class FloatingBubbleService : LifecycleService() {
         val alpha = if (isPaused && !isRunning) 0.55f else 1f
         bubbleView?.alpha = alpha
 
-        // Glow animation
         if (isRunning) startGlowPulse() else glowRing?.clearAnimation()
     }
 
@@ -186,7 +248,6 @@ class FloatingBubbleService : LifecycleService() {
                 }
                 MotionEvent.ACTION_UP -> {
                     if (!isDragging) {
-                        // Tap → show QuickMenuSheet as overlay without opening main app
                         val intent = Intent(this, QuickMenuActivity::class.java).apply {
                             flags = Intent.FLAG_ACTIVITY_NEW_TASK or
                                     Intent.FLAG_ACTIVITY_SINGLE_TOP or
@@ -220,21 +281,22 @@ class FloatingBubbleService : LifecycleService() {
     // ── Timer Tick ─────────────────────────────────────────────────────────────
 
     private fun startTicking() {
-        if (tickJob?.isActive == true) return
-        val startedAt = System.currentTimeMillis() - elapsedMs
-        tickJob = serviceScope.launch {
-            while (isActive) {
-                elapsedMs = System.currentTimeMillis() - startedAt
-                if (!bubbleHidden) updateBubbleContent()
-                updateNotification()
-                delay(1_000L)
+        // Already ticking — don't start a second executor task
+        if (scheduledFuture?.isDone == false) return
+        tickStartedAt = System.currentTimeMillis() - elapsedMs
+        scheduledFuture = executor.scheduleAtFixedRate({
+            // Running on executor thread — safe for notification, but NOT for view access
+            elapsedMs = System.currentTimeMillis() - tickStartedAt
+            updateNotification()
+            if (!bubbleHidden) {
+                mainHandler.post { updateBubbleContent() }
             }
-        }
+        }, 1000L, 1000L, TimeUnit.MILLISECONDS)
     }
 
     private fun stopTicking() {
-        tickJob?.cancel()
-        tickJob = null
+        scheduledFuture?.cancel(false)
+        scheduledFuture = null
     }
 
     // ── Notification ────────────────────────────────────────────────────────────
@@ -279,7 +341,7 @@ class FloatingBubbleService : LifecycleService() {
             }
         }
 
-        // Hide / Show Bubble toggle — always present so user can control visibility at any time
+        // Hide / Show Bubble toggle — always present
         val (bubbleIcon, bubbleLabel, bubbleAction) = if (bubbleHidden)
             Triple(R.drawable.ic_bubble_show, "Show Bubble", App.ACTION_SHOW_BUBBLE)
         else

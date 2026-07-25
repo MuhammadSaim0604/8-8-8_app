@@ -158,11 +158,24 @@ class QuickMenuSheet : BottomSheetDialogFragment() {
             layoutParams = LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT).apply { topMargin = 6.dp() }
         })
 
-        // Progress bar — at the bottom of the card
-        card.addView(ProgressBar(requireContext(), null, android.R.attr.progressBarStyleHorizontal).apply {
-            layoutParams = LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 3.dp()).apply { topMargin = 6.dp() }
-            max = 100; progress = pct
-            try { progressTintList = android.content.res.ColorStateList.valueOf(Color.parseColor(task.colorHex)) } catch (_: Exception) {}
+        // Progress bar — custom track+fill inside the card (not touching card edges)
+        // Using weight-based LinearLayout so the fill proportion is exact without needing onGlobalLayout.
+        val fillColor = try { Color.parseColor(task.colorHex) } catch (_: Exception) { Color.parseColor("#4A9EFF") }
+        card.addView(LinearLayout(requireContext()).apply {
+            orientation = LinearLayout.HORIZONTAL
+            layoutParams = LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT, 4.dp()
+            ).apply { topMargin = 8.dp() }
+            setBackgroundColor(Color.parseColor("#33FFFFFF"))
+            // Filled portion (proportional to progress)
+            addView(View(requireContext()).apply {
+                layoutParams = LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.MATCH_PARENT, pct.toFloat())
+                setBackgroundColor(fillColor)
+            })
+            // Empty portion
+            addView(View(requireContext()).apply {
+                layoutParams = LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.MATCH_PARENT, (100 - pct).toFloat())
+            })
         })
         return card
     }
