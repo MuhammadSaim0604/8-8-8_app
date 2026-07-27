@@ -360,9 +360,19 @@ class FloatingBubbleService : LifecycleService() {
     // ── Notification ────────────────────────────────────────────────────────────
 
     private fun buildNotification(): Notification {
+        val quickMenuIntent = PendingIntent.getActivity(
+            this,
+            0,
+            Intent(this, QuickMenuActivity::class.java).apply {
+                flags = Intent.FLAG_ACTIVITY_NEW_TASK or
+                        Intent.FLAG_ACTIVITY_SINGLE_TOP or
+                        Intent.FLAG_ACTIVITY_NO_ANIMATION
+            },
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
+
         val collapsedViews = RemoteViews(packageName, R.layout.layout_notification_collapsed)
         val expandedViews = RemoteViews(packageName, R.layout.layout_notification_expanded)
-        val showBubbleIntent = bubbleVisibilityPendingIntent(show = true)
         val bubbleToggleIntent = bubbleVisibilityPendingIntent(show = bubbleHidden)
 
         // 1. Populate Collapsed View
@@ -505,9 +515,9 @@ class FloatingBubbleService : LifecycleService() {
             .setAutoCancel(false)
             .setSilent(true)
             .setShowWhen(false)
-            // Tapping either notification presentation reveals the bubble instead
-            // of opening the full app.
-            .setContentIntent(showBubbleIntent)
+            // Tapping either notification presentation opens the same quick menu
+            // sheet as tapping the floating bubble.
+            .setContentIntent(quickMenuIntent)
             .setCustomContentView(collapsedViews)
             .setCustomBigContentView(expandedViews)
             .setPriority(NotificationCompat.PRIORITY_LOW)

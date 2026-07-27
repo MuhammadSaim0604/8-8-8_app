@@ -21,10 +21,10 @@
         android:background="@drawable/bg_notification_card_sleep"
         android:paddingStart="10dp"
         android:paddingEnd="8dp"
-        android:paddingTop="7dp"
-        android:paddingBottom="7dp"
-        android:layout_marginStart="-4dp"
-        android:layout_marginEnd="-4dp"
+        android:paddingTop="9dp"
+        android:paddingBottom="9dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginEnd="8dp"
         android:layout_marginBottom="5dp">
 
         <!-- Single row: emoji+label | ← task → | play | stop -->
@@ -135,10 +135,10 @@
         android:background="@drawable/bg_notification_card_work"
         android:paddingStart="10dp"
         android:paddingEnd="8dp"
-        android:paddingTop="7dp"
-        android:paddingBottom="7dp"
-        android:layout_marginStart="-4dp"
-        android:layout_marginEnd="-4dp"
+        android:paddingTop="9dp"
+        android:paddingBottom="9dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginEnd="8dp"
         android:layout_marginBottom="5dp">
 
         <LinearLayout
@@ -240,10 +240,10 @@
         android:background="@drawable/bg_notification_card_personal"
         android:paddingStart="10dp"
         android:paddingEnd="8dp"
-        android:paddingTop="7dp"
-        android:paddingBottom="7dp"
-        android:layout_marginStart="-4dp"
-        android:layout_marginEnd="-4dp">
+        android:paddingTop="9dp"
+        android:paddingBottom="9dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginEnd="8dp">
 
         <LinearLayout
             android:layout_width="match_parent"
