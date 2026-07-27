@@ -13,12 +13,13 @@ on:
         default: 'release'
         type: choice
         options:
-          - debug
           - release
+          - debug
 
 env:
   JAVA_VERSION: '17'
   GRADLE_VERSION: '8.4'
+  BUILD_TYPE: ${{ github.event.inputs.build_type || 'release' }}
 
 jobs:
   build:
@@ -62,7 +63,7 @@ jobs:
             ${{ runner.os }}-gradle-
 
       - name: Decode Keystore (Release only)
-        if: ${{ github.event.inputs.build_type == 'release' && env.KEYSTORE_BASE64 != '' }}
+        if: ${{ env.BUILD_TYPE == 'release' && secrets.KEYSTORE_BASE64 != '' }}
         env:
           KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
         run: |
@@ -70,13 +71,13 @@ jobs:
           echo "$KEYSTORE_BASE64" | base64 --decode > app/build/release.keystore
 
       - name: Build Debug APK
-        if: ${{ github.event.inputs.build_type != 'release' || github.event_name != 'workflow_dispatch' }}
+        if: ${{ env.BUILD_TYPE == 'debug' }}
         run: ./gradlew assembleDebug --no-daemon --stacktrace
         env:
           GRADLE_OPTS: '-Dorg.gradle.daemon=false -Dorg.gradle.jvmargs=-Xmx2048m'
 
       - name: Build Release APK
-        if: ${{ github.event.inputs.build_type == 'release' && github.event_name == 'workflow_dispatch' }}
+        if: ${{ env.BUILD_TYPE == 'release' }}
         run: ./gradlew assembleRelease --no-daemon --stacktrace
         env:
           KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
@@ -89,7 +90,7 @@ jobs:
         run: find app/build/outputs/apk -name "*.apk" | sort
 
       - name: Upload Debug APK
-        if: ${{ github.event.inputs.build_type != 'release' || github.event_name != 'workflow_dispatch' }}
+        if: ${{ env.BUILD_TYPE == 'debug' }}
         uses: actions/upload-artifact@v4
         with:
           name: DayBlocks-Debug-${{ github.run_number }}
@@ -97,7 +98,7 @@ jobs:
           retention-days: 30
 
       - name: Upload Release APK
-        if: ${{ github.event.inputs.build_type == 'release' && github.event_name == 'workflow_dispatch' }}
+        if: ${{ env.BUILD_TYPE == 'release' }}
         uses: actions/upload-artifact@v4
         with:
           name: DayBlocks-Release-${{ github.run_number }}
