@@ -140,9 +140,11 @@ class BlockDetailFragment : Fragment() {
             tvEl.visibility = View.GONE
         }
 
-        // Progress bar (top strip) — width starts at 0dp, set to pct * parentWidth
+        // Progress bar container & fill
+        val flProgContainer = card.findViewById<View>(R.id.flProgressContainer)
         val vProg = card.findViewById<View>(R.id.vTaskProgress)
         if (elapsed > 0 || running) {
+            flProgContainer.visibility = View.VISIBLE
             val pct = (elapsed.toFloat() / budgetMs.coerceAtLeast(1)).coerceIn(0f, 1f)
             vProg.post {
                 val parentW = (vProg.parent as? ViewGroup)?.width ?: 0
@@ -150,6 +152,8 @@ class BlockDetailFragment : Fragment() {
                 vProg.requestLayout()
             }
             try { vProg.setBackgroundColor(Color.parseColor(task.colorHex)) } catch (_: Exception) {}
+        } else {
+            flProgContainer.visibility = View.GONE
         }
 
         // Buttons

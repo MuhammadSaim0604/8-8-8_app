@@ -41,6 +41,7 @@ class TaskAdapter(
         val tvDur:       TextView  = v.findViewById(R.id.tvDuration)
         val tvElapsed:   TextView  = v.findViewById(R.id.tvElapsed)
         val vProgress:   View      = v.findViewById(R.id.vTaskProgress)
+        val flProgressContainer: View = v.findViewById(R.id.flProgressContainer)
         val vAccent:     View      = v.findViewById(R.id.vAccentBar)
         val vDot:        View      = v.findViewById(R.id.vPulseDot)
         val btnEdit:     View      = v.findViewById(R.id.btnEdit)
@@ -70,8 +71,9 @@ class TaskAdapter(
             h.tvElapsed.visibility = View.GONE
         }
 
-        // Progress strip — width is 0dp in XML, set to pct * parentWidth
+        // Progress strip
         if (elapsed > 0 || running) {
+            h.flProgressContainer.visibility = View.VISIBLE
             val pct = (elapsed.toFloat() / budgetMs.coerceAtLeast(1)).coerceIn(0f, 1f)
             h.vProgress.post {
                 val parentW = (h.vProgress.parent as? ViewGroup)?.width ?: 0
@@ -79,6 +81,8 @@ class TaskAdapter(
                 h.vProgress.requestLayout()
             }
             safeColor(task.colorHex)?.let { h.vProgress.setBackgroundColor(it) }
+        } else {
+            h.flProgressContainer.visibility = View.GONE
         }
 
         h.ivPlayIcon.setImageResource(if (running) R.drawable.ic_pause else R.drawable.ic_play)
