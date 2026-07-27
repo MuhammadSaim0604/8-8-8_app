@@ -1,371 +1,332 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--
+  Android expanded notifications max out at ~256dp.
+  3 blocks must ALL fit without scrolling.
+  Layout per block: one row (label + chevron-left + task-name + chevron-right + play + stop)
+                    + a thin 4dp progress bar.
+  Total per block ≈ 40dp row + 4dp bar + 5dp gap = ~50dp  → 3 × 50 = 150dp, well inside limit.
+-->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical"
-    android:background="@drawable/bg_notification_outer"
-    android:padding="14dp">
+    android:padding="10dp">
 
-    <!-- Sleep Block -->
+    <!-- ══ SLEEP BLOCK ══════════════════════════════════════════════════════ -->
     <LinearLayout
         android:id="@+id/llSleepBlock"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
         android:background="@drawable/bg_notification_card_sleep"
-        android:padding="12dp"
-        android:layout_marginBottom="8dp">
+        android:paddingStart="10dp"
+        android:paddingEnd="8dp"
+        android:paddingTop="7dp"
+        android:paddingBottom="7dp"
+        android:layout_marginBottom="5dp">
 
-        <RelativeLayout
+        <!-- Single row: emoji+label | ← task → | play | stop -->
+        <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical">
 
-            <LinearLayout
+            <!-- Block label -->
+            <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:gravity="center_vertical"
-                android:layout_alignParentStart="true"
-                android:layout_centerVertical="true">
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="🌙"
-                    android:textSize="12sp" />
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="SLEEP"
-                    android:textColor="@color/block_sleep"
-                    android:textSize="10sp"
-                    android:textStyle="bold"
-                    android:layout_marginStart="4dp" />
-            </LinearLayout>
+                android:text="🌙 SLEEP"
+                android:textColor="@color/block_sleep"
+                android:textSize="9sp"
+                android:textStyle="bold"
+                android:minWidth="56dp" />
 
-            <LinearLayout
-                android:layout_width="wrap_content"
+            <!-- Prev -->
+            <ImageView
+                android:id="@+id/btnSleepPrev"
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:src="@drawable/ic_chevron_left"
+                android:contentDescription="Prev"
+                android:clickable="true"
+                android:focusable="true"
+                android:layout_marginStart="4dp" />
+
+            <!-- Task name -->
+            <TextView
+                android:id="@+id/tvSleepTaskName"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:gravity="center_vertical"
-                android:layout_alignParentEnd="true"
-                android:layout_centerVertical="true">
-                <ImageView
-                    android:id="@+id/btnSleepPrev"
-                    android:layout_width="22dp"
-                    android:layout_height="22dp"
-                    android:src="@drawable/ic_chevron_left"
-                    android:contentDescription="Previous Task"
-                    android:clickable="true"
-                    android:focusable="true" />
-                <TextView
-                    android:id="@+id/tvSleepTaskName"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Deep Sleep"
-                    android:textColor="#FFFFFF"
-                    android:textSize="12sp"
-                    android:textStyle="bold"
-                    android:layout_marginHorizontal="6dp" />
-                <ImageView
-                    android:id="@+id/btnSleepNext"
-                    android:layout_width="22dp"
-                    android:layout_height="22dp"
-                    android:src="@drawable/ic_chevron_right"
-                    android:contentDescription="Next Task"
-                    android:clickable="true"
-                    android:focusable="true" />
-            </LinearLayout>
-        </RelativeLayout>
+                android:layout_weight="1"
+                android:text="Deep Sleep"
+                android:textColor="#FFFFFF"
+                android:textSize="11sp"
+                android:textStyle="bold"
+                android:maxLines="1"
+                android:ellipsize="end"
+                android:gravity="center"
+                android:layout_marginHorizontal="4dp" />
 
-        <ProgressBar
-            android:id="@+id/pbSleep"
-            style="?android:attr/progressBarStyleHorizontal"
-            android:layout_width="match_parent"
-            android:layout_height="5dp"
-            android:layout_marginVertical="8dp"
-            android:max="100"
-            android:progress="60"
-            android:progressDrawable="@drawable/bg_progress_sleep" />
+            <!-- Next -->
+            <ImageView
+                android:id="@+id/btnSleepNext"
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:src="@drawable/ic_chevron_right"
+                android:contentDescription="Next"
+                android:clickable="true"
+                android:focusable="true"
+                android:layout_marginEnd="6dp" />
 
-        <RelativeLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+            <!-- Time -->
             <TextView
                 android:id="@+id/tvSleepTime"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="06:45 / 08:00"
+                android:text="00:00"
                 android:textColor="#9CA3AF"
-                android:textSize="11sp"
-                android:layout_alignParentStart="true"
-                android:layout_centerVertical="true" />
+                android:textSize="9sp"
+                android:layout_marginEnd="6dp" />
 
-            <LinearLayout
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:layout_alignParentEnd="true"
-                android:layout_centerVertical="true">
-                <ImageView
-                    android:id="@+id/btnSleepPlayPause"
-                    android:layout_width="26dp"
-                    android:layout_height="26dp"
-                    android:src="@drawable/ic_play"
-                    android:contentDescription="Play/Pause"
-                    android:layout_marginEnd="8dp"
-                    android:clickable="true"
-                    android:focusable="true" />
-                <ImageView
-                    android:id="@+id/btnSleepStop"
-                    android:layout_width="26dp"
-                    android:layout_height="26dp"
-                    android:src="@drawable/ic_stop"
-                    android:contentDescription="Stop"
-                    android:clickable="true"
-                    android:focusable="true" />
-            </LinearLayout>
-        </RelativeLayout>
+            <!-- Play/Pause -->
+            <ImageView
+                android:id="@+id/btnSleepPlayPause"
+                android:layout_width="22dp"
+                android:layout_height="22dp"
+                android:src="@drawable/ic_play"
+                android:contentDescription="Play/Pause"
+                android:clickable="true"
+                android:focusable="true"
+                android:layout_marginEnd="4dp" />
+
+            <!-- Stop -->
+            <ImageView
+                android:id="@+id/btnSleepStop"
+                android:layout_width="22dp"
+                android:layout_height="22dp"
+                android:src="@drawable/ic_stop"
+                android:contentDescription="Stop"
+                android:clickable="true"
+                android:focusable="true" />
+        </LinearLayout>
+
+        <!-- Progress bar -->
+        <ProgressBar
+            android:id="@+id/pbSleep"
+            style="?android:attr/progressBarStyleHorizontal"
+            android:layout_width="match_parent"
+            android:layout_height="3dp"
+            android:layout_marginTop="5dp"
+            android:max="100"
+            android:progress="0"
+            android:progressDrawable="@drawable/bg_progress_sleep" />
+
     </LinearLayout>
 
-    <!-- Work Block -->
+    <!-- ══ WORK BLOCK ═══════════════════════════════════════════════════════ -->
     <LinearLayout
         android:id="@+id/llWorkBlock"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
         android:background="@drawable/bg_notification_card_work"
-        android:padding="12dp"
-        android:layout_marginBottom="8dp">
+        android:paddingStart="10dp"
+        android:paddingEnd="8dp"
+        android:paddingTop="7dp"
+        android:paddingBottom="7dp"
+        android:layout_marginBottom="5dp">
 
-        <RelativeLayout
+        <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical">
 
-            <LinearLayout
+            <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:gravity="center_vertical"
-                android:layout_alignParentStart="true"
-                android:layout_centerVertical="true">
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="💼"
-                    android:textSize="12sp" />
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="WORK"
-                    android:textColor="@color/block_work"
-                    android:textSize="10sp"
-                    android:textStyle="bold"
-                    android:layout_marginStart="4dp" />
-            </LinearLayout>
+                android:text="💼 WORK"
+                android:textColor="@color/block_work"
+                android:textSize="9sp"
+                android:textStyle="bold"
+                android:minWidth="56dp" />
 
-            <LinearLayout
+            <ImageView
+                android:id="@+id/btnWorkPrev"
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:src="@drawable/ic_chevron_left"
+                android:contentDescription="Prev"
+                android:clickable="true"
+                android:focusable="true"
+                android:layout_marginStart="4dp" />
+
+            <TextView
+                android:id="@+id/tvWorkTaskName"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="No task"
+                android:textColor="#FFFFFF"
+                android:textSize="11sp"
+                android:textStyle="bold"
+                android:maxLines="1"
+                android:ellipsize="end"
+                android:gravity="center"
+                android:layout_marginHorizontal="4dp" />
+
+            <ImageView
+                android:id="@+id/btnWorkNext"
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:src="@drawable/ic_chevron_right"
+                android:contentDescription="Next"
+                android:clickable="true"
+                android:focusable="true"
+                android:layout_marginEnd="6dp" />
+
+            <TextView
+                android:id="@+id/tvWorkTime"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:gravity="center_vertical"
-                android:layout_alignParentEnd="true"
-                android:layout_centerVertical="true">
-                <ImageView
-                    android:id="@+id/btnWorkPrev"
-                    android:layout_width="22dp"
-                    android:layout_height="22dp"
-                    android:src="@drawable/ic_chevron_left"
-                    android:contentDescription="Previous Task"
-                    android:clickable="true"
-                    android:focusable="true" />
-                <TextView
-                    android:id="@+id/tvWorkTaskName"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Learn React Native"
-                    android:textColor="#FFFFFF"
-                    android:textSize="12sp"
-                    android:textStyle="bold"
-                    android:layout_marginHorizontal="6dp" />
-                <ImageView
-                    android:id="@+id/btnWorkNext"
-                    android:layout_width="22dp"
-                    android:layout_height="22dp"
-                    android:src="@drawable/ic_chevron_right"
-                    android:contentDescription="Next Task"
-                    android:clickable="true"
-                    android:focusable="true" />
-            </LinearLayout>
-        </RelativeLayout>
+                android:text="00:00"
+                android:textColor="#9CA3AF"
+                android:textSize="9sp"
+                android:layout_marginEnd="6dp" />
+
+            <ImageView
+                android:id="@+id/btnWorkPlayPause"
+                android:layout_width="22dp"
+                android:layout_height="22dp"
+                android:src="@drawable/ic_play"
+                android:contentDescription="Play/Pause"
+                android:clickable="true"
+                android:focusable="true"
+                android:layout_marginEnd="4dp" />
+
+            <ImageView
+                android:id="@+id/btnWorkStop"
+                android:layout_width="22dp"
+                android:layout_height="22dp"
+                android:src="@drawable/ic_stop"
+                android:contentDescription="Stop"
+                android:clickable="true"
+                android:focusable="true" />
+        </LinearLayout>
 
         <ProgressBar
             android:id="@+id/pbWork"
             style="?android:attr/progressBarStyleHorizontal"
             android:layout_width="match_parent"
-            android:layout_height="5dp"
-            android:layout_marginVertical="8dp"
+            android:layout_height="3dp"
+            android:layout_marginTop="5dp"
             android:max="100"
-            android:progress="40"
+            android:progress="0"
             android:progressDrawable="@drawable/bg_progress_work" />
 
-        <RelativeLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content">
-            <TextView
-                android:id="@+id/tvWorkTime"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="01:15 / 02:45"
-                android:textColor="#9CA3AF"
-                android:textSize="11sp"
-                android:layout_alignParentStart="true"
-                android:layout_centerVertical="true" />
-
-            <LinearLayout
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:layout_alignParentEnd="true"
-                android:layout_centerVertical="true">
-                <ImageView
-                    android:id="@+id/btnWorkPlayPause"
-                    android:layout_width="26dp"
-                    android:layout_height="26dp"
-                    android:src="@drawable/ic_play"
-                    android:contentDescription="Play/Pause"
-                    android:layout_marginEnd="8dp"
-                    android:clickable="true"
-                    android:focusable="true" />
-                <ImageView
-                    android:id="@+id/btnWorkStop"
-                    android:layout_width="26dp"
-                    android:layout_height="26dp"
-                    android:src="@drawable/ic_stop"
-                    android:contentDescription="Stop"
-                    android:clickable="true"
-                    android:focusable="true" />
-            </LinearLayout>
-        </RelativeLayout>
     </LinearLayout>
 
-    <!-- Personal Block -->
+    <!-- ══ PERSONAL BLOCK ═══════════════════════════════════════════════════ -->
     <LinearLayout
         android:id="@+id/llPersonalBlock"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
         android:background="@drawable/bg_notification_card_personal"
-        android:padding="12dp">
+        android:paddingStart="10dp"
+        android:paddingEnd="8dp"
+        android:paddingTop="7dp"
+        android:paddingBottom="7dp">
 
-        <RelativeLayout
+        <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical">
 
-            <LinearLayout
+            <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:gravity="center_vertical"
-                android:layout_alignParentStart="true"
-                android:layout_centerVertical="true">
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="🧘"
-                    android:textSize="12sp" />
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="PERSONAL"
-                    android:textColor="@color/block_personal"
-                    android:textSize="10sp"
-                    android:textStyle="bold"
-                    android:layout_marginStart="4dp" />
-            </LinearLayout>
+                android:text="🧘 LIFE"
+                android:textColor="@color/block_personal"
+                android:textSize="9sp"
+                android:textStyle="bold"
+                android:minWidth="56dp" />
 
-            <LinearLayout
+            <ImageView
+                android:id="@+id/btnPersonalPrev"
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:src="@drawable/ic_chevron_left"
+                android:contentDescription="Prev"
+                android:clickable="true"
+                android:focusable="true"
+                android:layout_marginStart="4dp" />
+
+            <TextView
+                android:id="@+id/tvPersonalTaskName"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="No task"
+                android:textColor="#FFFFFF"
+                android:textSize="11sp"
+                android:textStyle="bold"
+                android:maxLines="1"
+                android:ellipsize="end"
+                android:gravity="center"
+                android:layout_marginHorizontal="4dp" />
+
+            <ImageView
+                android:id="@+id/btnPersonalNext"
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:src="@drawable/ic_chevron_right"
+                android:contentDescription="Next"
+                android:clickable="true"
+                android:focusable="true"
+                android:layout_marginEnd="6dp" />
+
+            <TextView
+                android:id="@+id/tvPersonalTime"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:gravity="center_vertical"
-                android:layout_alignParentEnd="true"
-                android:layout_centerVertical="true">
-                <ImageView
-                    android:id="@+id/btnPersonalPrev"
-                    android:layout_width="22dp"
-                    android:layout_height="22dp"
-                    android:src="@drawable/ic_chevron_left"
-                    android:contentDescription="Previous Task"
-                    android:clickable="true"
-                    android:focusable="true" />
-                <TextView
-                    android:id="@+id/tvPersonalTaskName"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Evening Meditation"
-                    android:textColor="#FFFFFF"
-                    android:textSize="12sp"
-                    android:textStyle="bold"
-                    android:layout_marginHorizontal="6dp" />
-                <ImageView
-                    android:id="@+id/btnPersonalNext"
-                    android:layout_width="22dp"
-                    android:layout_height="22dp"
-                    android:src="@drawable/ic_chevron_right"
-                    android:contentDescription="Next Task"
-                    android:clickable="true"
-                    android:focusable="true" />
-            </LinearLayout>
-        </RelativeLayout>
+                android:text="00:00"
+                android:textColor="#9CA3AF"
+                android:textSize="9sp"
+                android:layout_marginEnd="6dp" />
+
+            <ImageView
+                android:id="@+id/btnPersonalPlayPause"
+                android:layout_width="22dp"
+                android:layout_height="22dp"
+                android:src="@drawable/ic_play"
+                android:contentDescription="Play/Pause"
+                android:clickable="true"
+                android:focusable="true"
+                android:layout_marginEnd="4dp" />
+
+            <ImageView
+                android:id="@+id/btnPersonalStop"
+                android:layout_width="22dp"
+                android:layout_height="22dp"
+                android:src="@drawable/ic_stop"
+                android:contentDescription="Stop"
+                android:clickable="true"
+                android:focusable="true" />
+        </LinearLayout>
 
         <ProgressBar
             android:id="@+id/pbPersonal"
             style="?android:attr/progressBarStyleHorizontal"
             android:layout_width="match_parent"
-            android:layout_height="5dp"
-            android:layout_marginVertical="8dp"
+            android:layout_height="3dp"
+            android:layout_marginTop="5dp"
             android:max="100"
-            android:progress="20"
+            android:progress="0"
             android:progressDrawable="@drawable/bg_progress_personal" />
 
-        <RelativeLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content">
-            <TextView
-                android:id="@+id/tvPersonalTime"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="00:15 / 01:00"
-                android:textColor="#9CA3AF"
-                android:textSize="11sp"
-                android:layout_alignParentStart="true"
-                android:layout_centerVertical="true" />
-
-            <LinearLayout
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:layout_alignParentEnd="true"
-                android:layout_centerVertical="true">
-                <ImageView
-                    android:id="@+id/btnPersonalPlayPause"
-                    android:layout_width="26dp"
-                    android:layout_height="26dp"
-                    android:src="@drawable/ic_play"
-                    android:contentDescription="Play/Pause"
-                    android:layout_marginEnd="8dp"
-                    android:clickable="true"
-                    android:focusable="true" />
-                <ImageView
-                    android:id="@+id/btnPersonalStop"
-                    android:layout_width="26dp"
-                    android:layout_height="26dp"
-                    android:src="@drawable/ic_stop"
-                    android:contentDescription="Stop"
-                    android:clickable="true"
-                    android:focusable="true" />
-            </LinearLayout>
-        </RelativeLayout>
     </LinearLayout>
 
 </LinearLayout>
