@@ -170,6 +170,14 @@ class AppRepository(context: Context) {
     val bubbleHiddenFlow = prefs.bubbleHiddenFlow
     suspend fun setBubbleHidden(hidden: Boolean) = prefs.saveBubbleHidden(hidden)
 
+    // ── Selected Tasks ─────────────────────────────────────────────────────────
+    val selectedTasksFlow = prefs.selectedTasksFlow
+    suspend fun saveSelectedTaskId(blockId: String, taskId: String) {
+        val current = prefs.selectedTasksFlow.first().toMutableMap()
+        current[blockId] = taskId
+        prefs.saveSelectedTasks(current)
+    }
+
     // ── Reset Everything ───────────────────────────────────────────────────────
     suspend fun resetEverything() {
         taskDao.deleteAll()
@@ -179,5 +187,6 @@ class AppRepository(context: Context) {
         prefs.saveSettings(AppSettings())
         prefs.saveLastResetDate("")
         prefs.saveBubbleHidden(false)
+        prefs.saveSelectedTasks(emptyMap())
     }
 }

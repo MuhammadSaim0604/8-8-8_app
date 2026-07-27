@@ -23,6 +23,7 @@ class AppPrefs(private val context: Context) {
         val KEY_SETTINGS      = stringPreferencesKey("settings")
         val KEY_LAST_RESET    = stringPreferencesKey("last_reset_date")
         val KEY_BUBBLE_HIDDEN = booleanPreferencesKey("bubble_hidden")
+        val KEY_SELECTED_TASKS = stringPreferencesKey("selected_tasks")
     }
 
     // ── Timer State ──────────────────────────────────────────────────────────
@@ -90,5 +91,24 @@ class AppPrefs(private val context: Context) {
 
     suspend fun saveBubbleHidden(hidden: Boolean) {
         context.dataStore.edit { prefs -> prefs[KEY_BUBBLE_HIDDEN] = hidden }
+    }
+
+    // ── Selected Tasks for Notification Dashboard ──────────────────────────────
+
+    val selectedTasksFlow: Flow<Map<String, String>> = context.dataStore.data
+        .catch { emit(emptyPreferences()) }
+        .map { prefs ->
+            prefs[KEY_SELECTED_TASKS]?.let {
+                runCatching {
+                    @Suppress("UNCHECKED_CAST")
+                    gson.fromJson(it, Map::class.java) as? Map<String, String>
+                }.getOrNull() ?: emptyMap()
+            } ?: emptyMap()
+        }
+
+    suspend fun saveSelectedTasks(selected: Map<String, String>) {
+        context.dataStore.edit { prefs ->
+            prefs[KEY_SELECTED_TASKS] = gson.toJson(selected)
+        }
     }
 }

@@ -10,13 +10,16 @@ import android.view.*
 import android.widget.*
 import androidx.core.app.NotificationCompat
 import androidx.lifecycle.LifecycleService
+import androidx.lifecycle.lifecycleScope
 import com.dayblocks.app.App
 import com.dayblocks.app.MainActivity
 import com.dayblocks.app.R
 import com.dayblocks.app.data.db.AppDatabase
 import com.dayblocks.app.data.prefs.AppPrefs
 import com.dayblocks.app.ui.quickmenu.QuickMenuActivity
+import com.dayblocks.app.data.repository.AppRepository
 import kotlinx.coroutines.*
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.firstOrNull
 import java.util.concurrent.Executors
 import java.util.concurrent.ScheduledFuture
@@ -38,6 +41,12 @@ class FloatingBubbleService : LifecycleService() {
     @Volatile private var isRunning = false
     @Volatile private var isPaused  = false
     @Volatile private var bubbleHidden = false
+
+    // App state lists kept in memory for custom RemoteViews building
+    @Volatile private var listTasks: List<com.dayblocks.app.data.model.Task> = emptyList()
+    @Volatile private var timerState: com.dayblocks.app.data.model.TimerState? = null
+    @Volatile private var taskProgress: Map<String, Long> = emptyMap()
+    @Volatile private var selectedTasks: Map<String, String> = emptyMap()
 
     // ── Tick infrastructure ────────────────────────────────────────────────────
     // Use a Java ScheduledExecutorService instead of coroutines: coroutine delay()
@@ -72,13 +81,46 @@ class FloatingBubbleService : LifecycleService() {
 
     // ── Lifecycle ──────────────────────────────────────────────────────────────
 
+    private lateinit var repo: AppRepository
+
     override fun onCreate() {
         super.onCreate()
+        repo = AppRepository(this)
         windowManager = getSystemService(WINDOW_SERVICE) as WindowManager
         registerReceiver(actionReceiver, IntentFilter().apply {
             addAction(App.ACTION_HIDE_BUBBLE)
             addAction(App.ACTION_SHOW_BUBBLE)
         }, RECEIVER_NOT_EXPORTED)
+
+        // Observe repository state flows reactively
+        lifecycleScope.launch {
+            combine(
+                repo.tasksFlow,
+                repo.timerStateFlow,
+                repo.taskProgressFlow,
+                repo.selectedTasksFlow
+            ) { tasks, timer, progress, selected ->
+                listTasks = tasks
+                timerState = timer
+                taskProgress = progress
+                selectedTasks = selected
+            }.collect {
+                val currentTimer = timerState
+                if (currentTimer != null) {
+                    taskId = currentTimer.taskId
+                    val activeTask = listTasks.find { it.id == taskId }
+                    taskName = activeTask?.name ?: ""
+                    blockName = activeTask?.block?.label ?: ""
+                    isRunning = true
+                    isPaused = false
+                } else {
+                    isRunning = false
+                    isPaused = taskProgress.isNotEmpty()
+                }
+                mainHandler.post { applyState() }
+            }
+        }
+
         startForeground(App.NOTIFICATION_ID_BUBBLE, buildNotification())
     }
 
@@ -86,8 +128,6 @@ class FloatingBubbleService : LifecycleService() {
         super.onStartCommand(intent, flags, startId)
 
         if (intent == null) {
-            // Sticky restart after process kill — intent is null, so parseIntent would
-            // leave isRunning=false and kill the tick. Restore state from DataStore instead.
             restoreStateAndResume()
             return START_STICKY
         }
@@ -138,7 +178,7 @@ class FloatingBubbleService : LifecycleService() {
                     isPaused  = false
                 } else {
                     isRunning = false
-                    isPaused  = progress.isNotEmpty()
+                    isPaused = progress.isNotEmpty()
                 }
 
                 // Apply state on the main thread (view operations must be on main thread)
@@ -281,11 +321,14 @@ class FloatingBubbleService : LifecycleService() {
     // ── Timer Tick ─────────────────────────────────────────────────────────────
 
     private fun startTicking() {
-        // Already ticking — don't start a second executor task
         if (scheduledFuture?.isDone == false) return
-        tickStartedAt = System.currentTimeMillis() - elapsedMs
+        val currentTimer = timerState
+        if (currentTimer != null) {
+            tickStartedAt = currentTimer.startedAt - currentTimer.accumulatedMs
+        } else {
+            tickStartedAt = System.currentTimeMillis() - elapsedMs
+        }
         scheduledFuture = executor.scheduleAtFixedRate({
-            // Running on executor thread — safe for notification, but NOT for view access
             elapsedMs = System.currentTimeMillis() - tickStartedAt
             updateNotification()
             if (!bubbleHidden) {
@@ -308,6 +351,120 @@ class FloatingBubbleService : LifecycleService() {
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
 
+        val collapsedViews = RemoteViews(packageName, R.layout.layout_notification_collapsed)
+        val expandedViews = RemoteViews(packageName, R.layout.layout_notification_expanded)
+
+        // 1. Populate Collapsed View
+        val activeTimer = timerState
+        val runningTask = listTasks.find { it.id == activeTimer?.taskId }
+        if (runningTask != null) {
+            collapsedViews.setTextViewText(R.id.tvCollapsedEmoji, runningTask.block.emoji)
+            collapsedViews.setTextViewText(R.id.tvCollapsedTaskName, runningTask.name)
+            
+            val statusStr = if (isRunning) {
+                "${runningTask.block.label} · ${fmtHoursMin(elapsedMs)} elapsed"
+            } else {
+                "${runningTask.block.label} · Paused"
+            }
+            collapsedViews.setTextViewText(R.id.tvCollapsedStatus, statusStr)
+
+            collapsedViews.setViewVisibility(R.id.btnCollapsedPlayPause, View.VISIBLE)
+            collapsedViews.setViewVisibility(R.id.btnCollapsedStop, View.VISIBLE)
+
+            val playPauseIcon = if (isRunning) R.drawable.ic_pause else R.drawable.ic_play
+            collapsedViews.setImageViewResource(R.id.btnCollapsedPlayPause, playPauseIcon)
+
+            val playPauseAction = if (isRunning) App.ACTION_PAUSE else App.ACTION_RESUME
+            val playPauseIntent = Intent(this, NotificationActionReceiver::class.java).apply {
+                action = playPauseAction
+                if (playPauseAction == App.ACTION_RESUME) {
+                    putExtra(App.EXTRA_TASK_ID, runningTask.id)
+                }
+            }
+            val playPausePI = PendingIntent.getBroadcast(
+                this,
+                runningTask.id.hashCode() + playPauseAction.hashCode(),
+                playPauseIntent,
+                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+            )
+            collapsedViews.setOnClickPendingIntent(R.id.btnCollapsedPlayPause, playPausePI)
+
+            val stopIntent = Intent(this, NotificationActionReceiver::class.java).apply {
+                action = App.ACTION_STOP
+            }
+            val stopPI = PendingIntent.getBroadcast(
+                this,
+                App.ACTION_STOP.hashCode(),
+                stopIntent,
+                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+            )
+            collapsedViews.setOnClickPendingIntent(R.id.btnCollapsedStop, stopPI)
+
+            collapsedViews.setViewVisibility(R.id.pbCollapsed, View.VISIBLE)
+            val pct = (elapsedMs.toFloat() / runningTask.durationMs.coerceAtLeast(1)).coerceIn(0f, 1f)
+            collapsedViews.setProgressBar(R.id.pbCollapsed, 100, (pct * 100).toInt(), false)
+        } else {
+            val pausedTaskId = taskProgress.keys.firstOrNull()
+            val pausedTask = listTasks.find { it.id == pausedTaskId }
+            if (pausedTask != null) {
+                val accumulated = taskProgress[pausedTask.id] ?: 0L
+                collapsedViews.setTextViewText(R.id.tvCollapsedEmoji, pausedTask.block.emoji)
+                collapsedViews.setTextViewText(R.id.tvCollapsedTaskName, pausedTask.name)
+                collapsedViews.setTextViewText(R.id.tvCollapsedStatus, "${pausedTask.block.label} · Paused")
+
+                collapsedViews.setViewVisibility(R.id.btnCollapsedPlayPause, View.VISIBLE)
+                collapsedViews.setViewVisibility(R.id.btnCollapsedStop, View.VISIBLE)
+                collapsedViews.setImageViewResource(R.id.btnCollapsedPlayPause, R.drawable.ic_play)
+
+                val playPauseIntent = Intent(this, NotificationActionReceiver::class.java).apply {
+                    action = App.ACTION_RESUME
+                    putExtra(App.EXTRA_TASK_ID, pausedTask.id)
+                }
+                val playPausePI = PendingIntent.getBroadcast(
+                    this,
+                    pausedTask.id.hashCode() + App.ACTION_RESUME.hashCode(),
+                    playPauseIntent,
+                    PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+                )
+                collapsedViews.setOnClickPendingIntent(R.id.btnCollapsedPlayPause, playPausePI)
+
+                val stopIntent = Intent(this, NotificationActionReceiver::class.java).apply {
+                    action = App.ACTION_STOP
+                }
+                val stopPI = PendingIntent.getBroadcast(
+                    this,
+                    App.ACTION_STOP.hashCode(),
+                    stopIntent,
+                    PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+                )
+                collapsedViews.setOnClickPendingIntent(R.id.btnCollapsedStop, stopPI)
+
+                collapsedViews.setViewVisibility(R.id.pbCollapsed, View.VISIBLE)
+                val pct = (accumulated.toFloat() / pausedTask.durationMs.coerceAtLeast(1)).coerceIn(0f, 1f)
+                collapsedViews.setProgressBar(R.id.pbCollapsed, 100, (pct * 100).toInt(), false)
+            } else {
+                collapsedViews.setTextViewText(R.id.tvCollapsedEmoji, "⏱")
+                collapsedViews.setTextViewText(R.id.tvCollapsedTaskName, "DayBlocks")
+                collapsedViews.setTextViewText(R.id.tvCollapsedStatus, "8-8-8 Dashboard · Tap to open")
+                collapsedViews.setViewVisibility(R.id.btnCollapsedPlayPause, View.GONE)
+                collapsedViews.setViewVisibility(R.id.btnCollapsedStop, View.GONE)
+                collapsedViews.setViewVisibility(R.id.pbCollapsed, View.GONE)
+            }
+        }
+
+        // 2. Populate Expanded View (Sleep, Work, Personal blocks)
+        populateBlockRow(expandedViews, com.dayblocks.app.data.model.Block.SLEEP,
+            R.id.tvSleepTaskName, R.id.pbSleep, R.id.tvSleepTime,
+            R.id.btnSleepPlayPause, R.id.btnSleepStop, R.id.btnSleepPrev, R.id.btnSleepNext)
+
+        populateBlockRow(expandedViews, com.dayblocks.app.data.model.Block.WORK,
+            R.id.tvWorkTaskName, R.id.pbWork, R.id.tvWorkTime,
+            R.id.btnWorkPlayPause, R.id.btnWorkStop, R.id.btnWorkPrev, R.id.btnWorkNext)
+
+        populateBlockRow(expandedViews, com.dayblocks.app.data.model.Block.PERSONAL,
+            R.id.tvPersonalTaskName, R.id.pbPersonal, R.id.tvPersonalTime,
+            R.id.btnPersonalPlayPause, R.id.btnPersonalStop, R.id.btnPersonalPrev, R.id.btnPersonalNext)
+
         val builder = NotificationCompat.Builder(this, App.CHANNEL_ID_BUBBLE)
             .setSmallIcon(R.drawable.ic_notification)
             .setOngoing(true)
@@ -315,49 +472,130 @@ class FloatingBubbleService : LifecycleService() {
             .setSilent(true)
             .setShowWhen(false)
             .setContentIntent(openIntent)
+            .setCustomContentView(collapsedViews)
+            .setCustomBigContentView(expandedViews)
             .setPriority(NotificationCompat.PRIORITY_LOW)
             .setForegroundServiceBehavior(NotificationCompat.FOREGROUND_SERVICE_IMMEDIATE)
-
-        when {
-            isRunning -> {
-                val elapsedSec = elapsedMs / 1000
-                val mm = elapsedSec / 60; val ss = elapsedSec % 60
-                val timeStr = if (mm >= 60) "%d:%02d:%02d".format(mm/60, mm%60, ss)
-                              else "%02d:%02d".format(mm, ss)
-                builder.setContentTitle("⏱ $taskName")
-                builder.setContentText("$blockName · $timeStr elapsed — tap to open")
-                builder.addAction(buildAction(R.drawable.ic_pause, "Pause", App.ACTION_PAUSE))
-                builder.addAction(buildAction(R.drawable.ic_stop,  "Stop",  App.ACTION_STOP))
-            }
-            isPaused -> {
-                builder.setContentTitle("⏸ $taskName")
-                builder.setContentText("$blockName · Paused — tap to open")
-                builder.addAction(buildAction(R.drawable.ic_play, "Resume", App.ACTION_RESUME))
-                builder.addAction(buildAction(R.drawable.ic_stop, "Stop",   App.ACTION_STOP))
-            }
-            else -> {
-                builder.setContentTitle("DayBlocks")
-                builder.setContentText("8-8-8 Dashboard · tap to open")
-            }
-        }
-
-        // Hide / Show Bubble toggle — always present
-        val (bubbleIcon, bubbleLabel, bubbleAction) = if (bubbleHidden)
-            Triple(R.drawable.ic_bubble_show, "Show Bubble", App.ACTION_SHOW_BUBBLE)
-        else
-            Triple(R.drawable.ic_bubble_hide, "Hide Bubble", App.ACTION_HIDE_BUBBLE)
-        builder.addAction(buildAction(bubbleIcon, bubbleLabel, bubbleAction))
 
         return builder.build()
     }
 
-    private fun buildAction(iconRes: Int, title: String, action: String): NotificationCompat.Action {
-        val pi = PendingIntent.getBroadcast(
-            this, action.hashCode(),
-            Intent(action).setPackage(packageName),
-            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-        )
-        return NotificationCompat.Action(iconRes, title, pi)
+    private fun populateBlockRow(
+        rv: RemoteViews,
+        block: com.dayblocks.app.data.model.Block,
+        tvTaskNameId: Int,
+        pbId: Int,
+        tvTimeId: Int,
+        btnPlayPauseId: Int,
+        btnStopId: Int,
+        btnPrevId: Int,
+        btnNextId: Int
+    ) {
+        val blockTasks = listTasks.filter { it.blockId == block.name }
+        val activeTimer = timerState
+        val isCurrentBlockRunning = activeTimer != null && activeTimer.blockId == block.name
+        
+        val currentTask = when {
+            isCurrentBlockRunning -> listTasks.find { it.id == activeTimer?.taskId }
+            else -> {
+                val selectedId = selectedTasks[block.name]
+                listTasks.find { it.id == selectedId } ?: blockTasks.firstOrNull()
+            }
+        }
+
+        if (currentTask != null) {
+            rv.setTextViewText(tvTaskNameId, currentTask.name)
+            rv.setViewVisibility(btnPrevId, View.VISIBLE)
+            rv.setViewVisibility(btnNextId, View.VISIBLE)
+
+            val isThisTaskRunning = activeTimer != null && activeTimer.taskId == currentTask.id
+            val taskElapsed = when {
+                isThisTaskRunning -> elapsedMs
+                else -> taskProgress[currentTask.id] ?: 0L
+            }
+
+            val pct = (taskElapsed.toFloat() / currentTask.durationMs.coerceAtLeast(1)).coerceIn(0f, 1f)
+            rv.setProgressBar(pbId, 100, (pct * 100).toInt(), false)
+            rv.setTextViewText(tvTimeId, "${fmtHoursMin(taskElapsed)} / ${fmtHoursMin(currentTask.durationMs)}")
+
+            val playPauseIcon = if (isThisTaskRunning && isRunning) R.drawable.ic_pause else R.drawable.ic_play
+            rv.setImageViewResource(btnPlayPauseId, playPauseIcon)
+            rv.setViewVisibility(btnPlayPauseId, View.VISIBLE)
+
+            val playPauseAction = if (isThisTaskRunning && isRunning) App.ACTION_PAUSE else App.ACTION_RESUME
+            val playPauseIntent = Intent(this, NotificationActionReceiver::class.java).apply {
+                action = playPauseAction
+                if (playPauseAction == App.ACTION_RESUME) {
+                    putExtra(App.EXTRA_TASK_ID, currentTask.id)
+                }
+            }
+            val playPausePI = PendingIntent.getBroadcast(
+                this,
+                currentTask.id.hashCode() + playPauseAction.hashCode(),
+                playPauseIntent,
+                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+            )
+            rv.setOnClickPendingIntent(btnPlayPauseId, playPausePI)
+
+            val hasProgress = taskProgress.containsKey(currentTask.id) || isThisTaskRunning
+            if (hasProgress) {
+                rv.setViewVisibility(btnStopId, View.VISIBLE)
+                val stopIntent = Intent(this, NotificationActionReceiver::class.java).apply {
+                    action = App.ACTION_STOP
+                }
+                val stopPI = PendingIntent.getBroadcast(
+                    this,
+                    currentTask.id.hashCode() + App.ACTION_STOP.hashCode(),
+                    stopIntent,
+                    PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+                )
+                rv.setOnClickPendingIntent(btnStopId, stopPI)
+            } else {
+                rv.setViewVisibility(btnStopId, View.INVISIBLE)
+            }
+
+            val prevIntent = Intent(this, NotificationActionReceiver::class.java).apply {
+                action = App.ACTION_PREV_TASK
+                putExtra(App.EXTRA_BLOCK_ID, block.name)
+                putExtra(App.EXTRA_TASK_ID, currentTask.id)
+            }
+            val prevPI = PendingIntent.getBroadcast(
+                this,
+                block.name.hashCode() + App.ACTION_PREV_TASK.hashCode(),
+                prevIntent,
+                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+            )
+            rv.setOnClickPendingIntent(btnPrevId, prevPI)
+
+            val nextIntent = Intent(this, NotificationActionReceiver::class.java).apply {
+                action = App.ACTION_NEXT_TASK
+                putExtra(App.EXTRA_BLOCK_ID, block.name)
+                putExtra(App.EXTRA_TASK_ID, currentTask.id)
+            }
+            val nextPI = PendingIntent.getBroadcast(
+                this,
+                block.name.hashCode() + App.ACTION_NEXT_TASK.hashCode(),
+                nextIntent,
+                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+            )
+            rv.setOnClickPendingIntent(btnNextId, nextPI)
+
+        } else {
+            rv.setTextViewText(tvTaskNameId, "No tasks planned")
+            rv.setProgressBar(pbId, 100, 0, false)
+            rv.setTextViewText(tvTimeId, "--:-- / --:--")
+            rv.setViewVisibility(btnPrevId, View.INVISIBLE)
+            rv.setViewVisibility(btnNextId, View.INVISIBLE)
+            rv.setViewVisibility(btnPlayPauseId, View.INVISIBLE)
+            rv.setViewVisibility(btnStopId, View.INVISIBLE)
+        }
+    }
+
+    private fun fmtHoursMin(ms: Long): String {
+        val totalSec = ms / 1000
+        val hr = totalSec / 3600
+        val min = (totalSec % 3600) / 60
+        return "%02d:%02d".format(hr, min)
     }
 
     private fun updateNotification() {

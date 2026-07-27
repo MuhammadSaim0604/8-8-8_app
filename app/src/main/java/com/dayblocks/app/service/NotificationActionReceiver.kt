@@ -13,30 +13,68 @@ class NotificationActionReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
         val repo = AppRepository(context)
         val scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
+        val pendingResult = goAsync()
 
-        when (intent.action) {
-            App.ACTION_PAUSE -> scope.launch {
-                repo.pauseTask()
-                updateService(context, repo, false)
-            }
-            App.ACTION_RESUME -> scope.launch {
-                val timerState = repo.timerStateFlow.firstOrNull()
-                val taskProgress = repo.taskProgressFlow.firstOrNull()
-                val taskId = taskProgress?.keys?.firstOrNull() ?: return@launch
-                repo.resumeTask(taskId)
-                updateService(context, repo, true)
-            }
-            App.ACTION_STOP -> scope.launch {
-                repo.stopTask()
-                updateServiceIdle(context)
-            }
-            App.ACTION_HIDE_BUBBLE -> scope.launch {
-                repo.setBubbleHidden(true)
-                // Bubble service handles this via its own receiver
-            }
-            App.ACTION_SHOW_BUBBLE -> scope.launch {
-                repo.setBubbleHidden(false)
-                // Bubble service handles this via its own receiver
+        scope.launch {
+            try {
+                when (intent.action) {
+                    App.ACTION_PAUSE -> {
+                        repo.pauseTask()
+                        updateService(context, repo, false)
+                    }
+                    App.ACTION_RESUME -> {
+                        val taskId = intent.getStringExtra(App.EXTRA_TASK_ID)
+                        if (taskId != null) {
+                            repo.resumeTask(taskId)
+                            updateService(context, repo, true)
+                        } else {
+                            val taskProgress = repo.taskProgressFlow.firstOrNull()
+                            val fallbackTaskId = taskProgress?.keys?.firstOrNull()
+                            if (fallbackTaskId != null) {
+                                repo.resumeTask(fallbackTaskId)
+                                updateService(context, repo, true)
+                            }
+                        }
+                    }
+                    App.ACTION_STOP -> {
+                        repo.stopTask()
+                        updateServiceIdle(context)
+                    }
+                    App.ACTION_HIDE_BUBBLE -> {
+                        repo.setBubbleHidden(true)
+                    }
+                    App.ACTION_SHOW_BUBBLE -> {
+                        repo.setBubbleHidden(false)
+                    }
+                    App.ACTION_PREV_TASK, App.ACTION_NEXT_TASK -> {
+                        val blockId = intent.getStringExtra(App.EXTRA_BLOCK_ID) ?: return@launch
+                        val currentTaskId = intent.getStringExtra(App.EXTRA_TASK_ID) ?: ""
+                        val allTasks = repo.tasksFlow.firstOrNull() ?: emptyList()
+                        val blockTasks = allTasks.filter { it.blockId == blockId }
+                        if (blockTasks.isNotEmpty()) {
+                            val currentIndex = blockTasks.indexOfFirst { it.id == currentTaskId }
+                            val nextIndex = if (intent.action == App.ACTION_PREV_TASK) {
+                                if (currentIndex <= 0) blockTasks.lastIndex else currentIndex - 1
+                            } else {
+                                if (currentIndex == -1 || currentIndex >= blockTasks.lastIndex) 0 else currentIndex + 1
+                            }
+                            val newTask = blockTasks[nextIndex]
+                            
+                            val timer = repo.timerStateFlow.firstOrNull()
+                            val wasRunning = timer != null && timer.taskId == currentTaskId
+                            
+                            if (wasRunning) {
+                                repo.switchTask(newTask)
+                                updateService(context, repo, true)
+                            } else {
+                                repo.saveSelectedTaskId(blockId, newTask.id)
+                                updateService(context, repo, false)
+                            }
+                        }
+                    }
+                }
+            } finally {
+                pendingResult.finish()
             }
         }
     }

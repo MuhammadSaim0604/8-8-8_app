@@ -21,9 +21,12 @@ class App : Application() {
         const val ACTION_HIDE_BUBBLE = "com.dayblocks.app.ACTION_HIDE_BUBBLE"
         const val ACTION_SHOW_BUBBLE = "com.dayblocks.app.ACTION_SHOW_BUBBLE"
         const val ACTION_OPEN_APP    = "com.dayblocks.app.OPEN_APP"
+        const val ACTION_PREV_TASK   = "com.dayblocks.app.ACTION_PREV_TASK"
+        const val ACTION_NEXT_TASK   = "com.dayblocks.app.ACTION_NEXT_TASK"
 
         // Intent extras
         const val EXTRA_OPEN_QUICK_MENU = "open_quick_menu"
+        const val EXTRA_BLOCK_ID        = "block_id"
 
         // Service broadcast extras
         const val EXTRA_TASK_ID      = "task_id"

@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="72dp"
+    android:orientation="vertical"
+    android:background="@drawable/bg_notification_outer"
+    android:padding="10dp">
+
+    <!-- Content Row -->
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:gravity="center_vertical">
+
+        <!-- Active Block Indicator / Icon -->
+        <TextView
+            android:id="@+id/tvCollapsedEmoji"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="⏱"
+            android:textSize="20sp"
+            android:layout_alignParentStart="true"
+            android:layout_centerVertical="true"
+            android:layout_marginStart="4dp" />
+
+        <!-- Task & Block Details -->
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:layout_toEndOf="@id/tvCollapsedEmoji"
+            android:layout_toStartOf="@id/llCollapsedControls"
+            android:layout_centerVertical="true"
+            android:layout_marginStart="10dp"
+            android:layout_marginEnd="10dp">
+
+            <TextView
+                android:id="@+id/tvCollapsedTaskName"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="No running task"
+                android:textColor="#FFFFFF"
+                android:textSize="13sp"
+                android:textStyle="bold"
+                android:maxLines="1"
+                android:ellipsize="end" />
+
+            <TextView
+                android:id="@+id/tvCollapsedStatus"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Tap to choose task"
+                android:textColor="@color/text_secondary"
+                android:textSize="11sp" />
+        </LinearLayout>
+
+        <!-- Controls -->
+        <LinearLayout
+            android:id="@+id/llCollapsedControls"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_alignParentEnd="true"
+            android:layout_centerVertical="true"
+            android:layout_marginEnd="4dp">
+
+            <ImageView
+                android:id="@+id/btnCollapsedPlayPause"
+                android:layout_width="26dp"
+                android:layout_height="26dp"
+                android:src="@drawable/ic_play"
+                android:contentDescription="Play/Pause"
+                android:layout_marginEnd="8dp"
+                android:visibility="gone"
+                android:clickable="true"
+                android:focusable="true" />
+
+            <ImageView
+                android:id="@+id/btnCollapsedStop"
+                android:layout_width="26dp"
+                android:layout_height="26dp"
+                android:src="@drawable/ic_stop"
+                android:contentDescription="Stop"
+                android:visibility="gone"
+                android:clickable="true"
+                android:focusable="true" />
+        </LinearLayout>
+    </RelativeLayout>
+
+    <!-- Bottom tiny progress bar -->
+    <ProgressBar
+        android:id="@+id/pbCollapsed"
+        style="?android:attr/progressBarStyleHorizontal"
+        android:layout_width="match_parent"
+        android:layout_height="3dp"
+        android:layout_marginTop="6dp"
+        android:max="100"
+        android:progress="0"
+        android:visibility="gone"
+        android:progressDrawable="@drawable/bg_progress_work" />
+
+</LinearLayout>
