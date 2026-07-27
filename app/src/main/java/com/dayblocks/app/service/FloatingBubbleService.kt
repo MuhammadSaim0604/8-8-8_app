@@ -12,7 +12,6 @@ import androidx.core.app.NotificationCompat
 import androidx.lifecycle.LifecycleService
 import androidx.lifecycle.lifecycleScope
 import com.dayblocks.app.App
-import com.dayblocks.app.MainActivity
 import com.dayblocks.app.R
 import com.dayblocks.app.data.db.AppDatabase
 import com.dayblocks.app.data.prefs.AppPrefs
@@ -132,6 +131,15 @@ class FloatingBubbleService : LifecycleService() {
             return START_STICKY
         }
 
+        if (intent.action == App.ACTION_HIDE_BUBBLE || intent.action == App.ACTION_SHOW_BUBBLE) {
+            bubbleHidden = intent.action == App.ACTION_HIDE_BUBBLE
+            mainHandler.post {
+                if (bubbleHidden) hideBubbleView() else showBubbleView()
+                updateNotification()
+            }
+            return START_STICKY
+        }
+
         parseIntent(intent)
         applyState()
         return START_STICKY
@@ -209,6 +217,12 @@ class FloatingBubbleService : LifecycleService() {
         timerText = view.findViewById(R.id.tvBubbleTimer)
         taskLabel = view.findViewById(R.id.tvBubbleTask)
         glowRing  = view.findViewById(R.id.vBubbleGlow)
+        view.findViewById<ImageButton>(R.id.btnBubbleClose).setOnClickListener {
+            bubbleHidden = true
+            serviceScope.launch { repo.setBubbleHidden(true) }
+            hideBubbleView()
+            updateNotification()
+        }
 
         updateBubbleContent()
         setupBubbleDrag(view)
@@ -307,6 +321,7 @@ class FloatingBubbleService : LifecycleService() {
     }
 
     private fun showBubbleView() {
+        if (!Settings.canDrawOverlays(this)) return
         if (bubbleView == null) createBubble()
         else bubbleView?.visibility = View.VISIBLE
     }
@@ -345,14 +360,10 @@ class FloatingBubbleService : LifecycleService() {
     // ── Notification ────────────────────────────────────────────────────────────
 
     private fun buildNotification(): Notification {
-        val openIntent = PendingIntent.getActivity(
-            this, 0,
-            Intent(this, MainActivity::class.java).apply { flags = Intent.FLAG_ACTIVITY_SINGLE_TOP },
-            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-        )
-
         val collapsedViews = RemoteViews(packageName, R.layout.layout_notification_collapsed)
         val expandedViews = RemoteViews(packageName, R.layout.layout_notification_expanded)
+        val showBubbleIntent = bubbleVisibilityPendingIntent(show = true)
+        val bubbleToggleIntent = bubbleVisibilityPendingIntent(show = bubbleHidden)
 
         // 1. Populate Collapsed View
         val activeTimer = timerState
@@ -362,7 +373,7 @@ class FloatingBubbleService : LifecycleService() {
             collapsedViews.setTextViewText(R.id.tvCollapsedTaskName, runningTask.name)
             
             val statusStr = if (isRunning) {
-                "${runningTask.block.label} · ${fmtHoursMin(elapsedMs)} elapsed"
+                "${runningTask.block.label} · ${fmtHoursMinSec(elapsedMs)} elapsed"
             } else {
                 "${runningTask.block.label} · Paused"
             }
@@ -451,6 +462,15 @@ class FloatingBubbleService : LifecycleService() {
                 collapsedViews.setViewVisibility(R.id.pbCollapsed, View.GONE)
             }
         }
+        collapsedViews.setImageViewResource(
+            R.id.btnCollapsedBubble,
+            if (bubbleHidden) R.drawable.ic_bubble_show else R.drawable.ic_bubble_hide
+        )
+        collapsedViews.setContentDescription(
+            R.id.btnCollapsedBubble,
+            if (bubbleHidden) "Show floating bubble" else "Hide floating bubble"
+        )
+        collapsedViews.setOnClickPendingIntent(R.id.btnCollapsedBubble, bubbleToggleIntent)
 
         // 2. Populate Expanded View (Sleep, Work, Personal blocks)
         populateBlockRow(expandedViews, com.dayblocks.app.data.model.Block.SLEEP,
@@ -465,13 +485,29 @@ class FloatingBubbleService : LifecycleService() {
             R.id.tvPersonalTaskName, R.id.pbPersonal, R.id.tvPersonalTime,
             R.id.btnPersonalPlayPause, R.id.btnPersonalStop, R.id.btnPersonalPrev, R.id.btnPersonalNext)
 
+        expandedViews.setImageViewResource(
+            R.id.ivExpandedBubble,
+            if (bubbleHidden) R.drawable.ic_bubble_show else R.drawable.ic_bubble_hide
+        )
+        expandedViews.setTextViewText(
+            R.id.tvExpandedBubble,
+            if (bubbleHidden) "Show Bubble" else "Hide Bubble"
+        )
+        expandedViews.setContentDescription(
+            R.id.btnExpandedBubble,
+            if (bubbleHidden) "Show floating bubble" else "Hide floating bubble"
+        )
+        expandedViews.setOnClickPendingIntent(R.id.btnExpandedBubble, bubbleToggleIntent)
+
         val builder = NotificationCompat.Builder(this, App.CHANNEL_ID_BUBBLE)
             .setSmallIcon(R.drawable.ic_notification)
             .setOngoing(true)
             .setAutoCancel(false)
             .setSilent(true)
             .setShowWhen(false)
-            .setContentIntent(openIntent)
+            // Tapping either notification presentation reveals the bubble instead
+            // of opening the full app.
+            .setContentIntent(showBubbleIntent)
             .setCustomContentView(collapsedViews)
             .setCustomBigContentView(expandedViews)
             .setPriority(NotificationCompat.PRIORITY_LOW)
@@ -516,7 +552,7 @@ class FloatingBubbleService : LifecycleService() {
 
             val pct = (taskElapsed.toFloat() / currentTask.durationMs.coerceAtLeast(1)).coerceIn(0f, 1f)
             rv.setProgressBar(pbId, 100, (pct * 100).toInt(), false)
-            rv.setTextViewText(tvTimeId, "${fmtHoursMin(taskElapsed)} / ${fmtHoursMin(currentTask.durationMs)}")
+            rv.setTextViewText(tvTimeId, "${fmtHoursMinSec(taskElapsed)} / ${fmtHoursMinSec(currentTask.durationMs)}")
 
             val playPauseIcon = if (isThisTaskRunning && isRunning) R.drawable.ic_pause else R.drawable.ic_play
             rv.setImageViewResource(btnPlayPauseId, playPauseIcon)
@@ -583,7 +619,7 @@ class FloatingBubbleService : LifecycleService() {
         } else {
             rv.setTextViewText(tvTaskNameId, "No tasks planned")
             rv.setProgressBar(pbId, 100, 0, false)
-            rv.setTextViewText(tvTimeId, "--:-- / --:--")
+            rv.setTextViewText(tvTimeId, "--:--:-- / --:--:--")
             rv.setViewVisibility(btnPrevId, View.INVISIBLE)
             rv.setViewVisibility(btnNextId, View.INVISIBLE)
             rv.setViewVisibility(btnPlayPauseId, View.INVISIBLE)
@@ -591,11 +627,25 @@ class FloatingBubbleService : LifecycleService() {
         }
     }
 
-    private fun fmtHoursMin(ms: Long): String {
+    private fun fmtHoursMinSec(ms: Long): String {
         val totalSec = ms / 1000
         val hr = totalSec / 3600
         val min = (totalSec % 3600) / 60
-        return "%02d:%02d".format(hr, min)
+        val sec = totalSec % 60
+        return "%02d:%02d:%02d".format(hr, min, sec)
+    }
+
+    private fun bubbleVisibilityPendingIntent(show: Boolean): PendingIntent {
+        val action = if (show) App.ACTION_SHOW_BUBBLE else App.ACTION_HIDE_BUBBLE
+        val intent = Intent(this, NotificationActionReceiver::class.java).apply {
+            this.action = action
+        }
+        return PendingIntent.getBroadcast(
+            this,
+            if (show) 7001 else 7002,
+            intent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
     }
 
     private fun updateNotification() {

@@ -47,6 +47,9 @@ class QuickMenuSheet : BottomSheetDialogFragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         binding.btnClose.setOnClickListener { dismiss() }
+        binding.btnToggleBubble.setOnClickListener {
+            vm.toggleBubble(requireContext())
+        }
         binding.etSearch.addTextChangedListener(object : TextWatcher {
             override fun afterTextChanged(s: Editable?) { render(s?.toString() ?: "") }
             override fun beforeTextChanged(s: CharSequence?, a: Int, b: Int, c: Int) {}
@@ -63,6 +66,17 @@ class QuickMenuSheet : BottomSheetDialogFragment() {
         // Also re-render when the task list loads/changes (fixes blank list on first open)
         viewLifecycleOwner.lifecycleScope.launch {
             vm.tasks.collect { render(binding.etSearch.text?.toString() ?: "") }
+        }
+        viewLifecycleOwner.lifecycleScope.launch {
+            vm.bubbleHidden.collect { hidden ->
+                binding.btnToggleBubble.setImageResource(
+                    if (hidden) R.drawable.ic_bubble_show else R.drawable.ic_bubble_hide
+                )
+                binding.btnToggleBubble.contentDescription =
+                    if (hidden) "Show floating bubble" else "Hide floating bubble"
+                binding.tvBubbleVisibility.text =
+                    if (hidden) "Show Bubble" else "Hide Bubble"
+            }
         }
     }
 

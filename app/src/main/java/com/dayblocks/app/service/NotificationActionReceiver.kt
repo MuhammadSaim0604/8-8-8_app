@@ -42,9 +42,11 @@ class NotificationActionReceiver : BroadcastReceiver() {
                     }
                     App.ACTION_HIDE_BUBBLE -> {
                         repo.setBubbleHidden(true)
+                        updateBubbleVisibilityService(context, App.ACTION_HIDE_BUBBLE)
                     }
                     App.ACTION_SHOW_BUBBLE -> {
                         repo.setBubbleHidden(false)
+                        updateBubbleVisibilityService(context, App.ACTION_SHOW_BUBBLE)
                     }
                     App.ACTION_PREV_TASK, App.ACTION_NEXT_TASK -> {
                         val blockId = intent.getStringExtra(App.EXTRA_BLOCK_ID) ?: return@launch
@@ -102,5 +104,13 @@ class NotificationActionReceiver : BroadcastReceiver() {
             putExtra(App.EXTRA_IS_PAUSED,  false)
         }
         context.startForegroundService(intent)
+    }
+
+    private fun updateBubbleVisibilityService(context: Context, action: String) {
+        context.startForegroundService(
+            Intent(context, FloatingBubbleService::class.java).apply {
+                this.action = action
+            }
+        )
     }
 }

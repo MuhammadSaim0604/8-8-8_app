@@ -44,4 +44,15 @@
             android:text="Task" />
     </LinearLayout>
 
+    <!-- Tiny close control for hiding the floating bubble -->
+    <ImageButton
+        android:id="@+id/btnBubbleClose"
+        android:layout_width="20dp"
+        android:layout_height="20dp"
+        android:layout_gravity="top|end"
+        android:background="@drawable/bg_circle_danger"
+        android:contentDescription="Hide floating bubble"
+        android:padding="4dp"
+        android:src="@drawable/ic_close" />
+
 </FrameLayout>

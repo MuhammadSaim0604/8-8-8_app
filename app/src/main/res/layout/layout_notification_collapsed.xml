@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
   Collapsed notification — mirrors the compact single-row style of the expanded blocks.
-  Single row:  [emoji] [task name (flex)]  [block · elapsed]  [▶] [■]
+   Single row:  [emoji] [task name (flex)]  [block · elapsed]  [▶] [■] [bubble]
   Bottom:       thin 3dp progress bar (hidden when idle)
   Max height for collapsed: ~64dp
 -->
@@ -82,6 +82,17 @@
             android:visibility="gone"
             android:clickable="true"
             android:focusable="true" />
+
+        <!-- Hide/show floating bubble -->
+        <ImageView
+            android:id="@+id/btnCollapsedBubble"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:src="@drawable/ic_bubble_hide"
+            android:contentDescription="Hide or show floating bubble"
+            android:clickable="true"
+            android:focusable="true"
+            android:layout_marginStart="6dp" />
     </LinearLayout>
 
     <!-- Thin block-colour progress bar — only shown when a task is active -->

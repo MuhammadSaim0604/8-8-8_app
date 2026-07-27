@@ -289,4 +289,33 @@
 
     </ScrollView>
 
+    <!-- Floating bubble visibility -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="20dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginBottom="16dp"
+        android:gravity="center_vertical"
+        android:orientation="horizontal">
+
+        <ImageButton
+            android:id="@+id/btnToggleBubble"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:background="@drawable/bg_circle_dark"
+            android:contentDescription="Hide or show floating bubble"
+            android:padding="9dp"
+            android:src="@drawable/ic_bubble_hide" />
+
+        <TextView
+            android:id="@+id/tvBubbleVisibility"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="12dp"
+            android:text="Hide Bubble"
+            android:textColor="@color/text_primary"
+            android:textSize="14sp" />
+    </LinearLayout>
+
 </LinearLayout>
