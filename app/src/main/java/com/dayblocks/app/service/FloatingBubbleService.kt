@@ -345,7 +345,6 @@ class FloatingBubbleService : LifecycleService() {
         }
         scheduledFuture = executor.scheduleAtFixedRate({
             elapsedMs = System.currentTimeMillis() - tickStartedAt
-            updateNotification()
             if (!bubbleHidden) {
                 mainHandler.post { updateBubbleContent() }
             }
@@ -371,23 +370,36 @@ class FloatingBubbleService : LifecycleService() {
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
 
+        val activeTimer = timerState
         val collapsedViews = RemoteViews(packageName, R.layout.layout_notification_collapsed)
         val expandedViews = RemoteViews(packageName, R.layout.layout_notification_expanded)
         val bubbleToggleIntent = bubbleVisibilityPendingIntent(show = bubbleHidden)
+        val notificationElapsedMs = if (isRunning && activeTimer != null) {
+            activeTimer.elapsedMs()
+        } else {
+            elapsedMs
+        }
 
         // 1. Populate Collapsed View
-        val activeTimer = timerState
         val runningTask = listTasks.find { it.id == activeTimer?.taskId }
         if (runningTask != null) {
             collapsedViews.setTextViewText(R.id.tvCollapsedEmoji, runningTask.block.emoji)
             collapsedViews.setTextViewText(R.id.tvCollapsedTaskName, runningTask.name)
             
-            val statusStr = if (isRunning) {
-                "${runningTask.block.label} · ${fmtHoursMinSec(elapsedMs)} elapsed"
+            if (isRunning) {
+                collapsedViews.setChronometer(
+                    R.id.tvCollapsedStatus,
+                    SystemClock.elapsedRealtime() - notificationElapsedMs,
+                    "${runningTask.block.label} · %s elapsed",
+                    true
+                )
             } else {
-                "${runningTask.block.label} · Paused"
+                collapsedViews.setChronometer(R.id.tvCollapsedStatus, 0L, null, false)
+                collapsedViews.setTextViewText(
+                    R.id.tvCollapsedStatus,
+                    "${runningTask.block.label} · Paused"
+                )
             }
-            collapsedViews.setTextViewText(R.id.tvCollapsedStatus, statusStr)
 
             collapsedViews.setViewVisibility(R.id.btnCollapsedPlayPause, View.VISIBLE)
             collapsedViews.setViewVisibility(R.id.btnCollapsedStop, View.VISIBLE)
@@ -422,7 +434,7 @@ class FloatingBubbleService : LifecycleService() {
             collapsedViews.setOnClickPendingIntent(R.id.btnCollapsedStop, stopPI)
 
             collapsedViews.setViewVisibility(R.id.pbCollapsed, View.VISIBLE)
-            val pct = (elapsedMs.toFloat() / runningTask.durationMs.coerceAtLeast(1)).coerceIn(0f, 1f)
+            val pct = (notificationElapsedMs.toFloat() / runningTask.durationMs.coerceAtLeast(1)).coerceIn(0f, 1f)
             collapsedViews.setProgressBar(R.id.pbCollapsed, 100, (pct * 100).toInt(), false)
         } else {
             val pausedTaskId = taskProgress.keys.firstOrNull()
@@ -466,6 +478,7 @@ class FloatingBubbleService : LifecycleService() {
             } else {
                 collapsedViews.setTextViewText(R.id.tvCollapsedEmoji, "⏱")
                 collapsedViews.setTextViewText(R.id.tvCollapsedTaskName, "DayBlocks")
+                collapsedViews.setChronometer(R.id.tvCollapsedStatus, 0L, null, false)
                 collapsedViews.setTextViewText(R.id.tvCollapsedStatus, "8-8-8 Dashboard · Tap to open")
                 collapsedViews.setViewVisibility(R.id.btnCollapsedPlayPause, View.GONE)
                 collapsedViews.setViewVisibility(R.id.btnCollapsedStop, View.GONE)
@@ -556,13 +569,26 @@ class FloatingBubbleService : LifecycleService() {
 
             val isThisTaskRunning = activeTimer != null && activeTimer.taskId == currentTask.id
             val taskElapsed = when {
-                isThisTaskRunning -> elapsedMs
+                isThisTaskRunning -> activeTimer?.elapsedMs() ?: elapsedMs
                 else -> taskProgress[currentTask.id] ?: 0L
             }
 
             val pct = (taskElapsed.toFloat() / currentTask.durationMs.coerceAtLeast(1)).coerceIn(0f, 1f)
             rv.setProgressBar(pbId, 100, (pct * 100).toInt(), false)
-            rv.setTextViewText(tvTimeId, "${fmtHoursMinSec(taskElapsed)} / ${fmtHoursMinSec(currentTask.durationMs)}")
+            if (isThisTaskRunning && isRunning) {
+                rv.setChronometer(
+                    tvTimeId,
+                    SystemClock.elapsedRealtime() - taskElapsed,
+                    "%s / ${fmtHoursMinSec(currentTask.durationMs)}",
+                    true
+                )
+            } else {
+                rv.setChronometer(tvTimeId, 0L, null, false)
+                rv.setTextViewText(
+                    tvTimeId,
+                    "${fmtHoursMinSec(taskElapsed)} / ${fmtHoursMinSec(currentTask.durationMs)}"
+                )
+            }
 
             val playPauseIcon = if (isThisTaskRunning && isRunning) R.drawable.ic_pause else R.drawable.ic_play
             rv.setImageViewResource(btnPlayPauseId, playPauseIcon)
@@ -629,6 +655,7 @@ class FloatingBubbleService : LifecycleService() {
         } else {
             rv.setTextViewText(tvTaskNameId, "No tasks planned")
             rv.setProgressBar(pbId, 100, 0, false)
+            rv.setChronometer(tvTimeId, 0L, null, false)
             rv.setTextViewText(tvTimeId, "--:--:-- / --:--:--")
             rv.setViewVisibility(btnPrevId, View.INVISIBLE)
             rv.setViewVisibility(btnNextId, View.INVISIBLE)

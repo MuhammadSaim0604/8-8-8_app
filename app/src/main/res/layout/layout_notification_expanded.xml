@@ -82,7 +82,7 @@
                 android:layout_marginEnd="6dp" />
 
             <!-- Time -->
-            <TextView
+            <Chronometer
                 android:id="@+id/tvSleepTime"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -190,7 +190,7 @@
                 android:focusable="true"
                 android:layout_marginEnd="6dp" />
 
-            <TextView
+            <Chronometer
                 android:id="@+id/tvWorkTime"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -294,7 +294,7 @@
                 android:focusable="true"
                 android:layout_marginEnd="6dp" />
 
-            <TextView
+            <Chronometer
                 android:id="@+id/tvPersonalTime"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
