@@ -345,8 +345,9 @@ class FloatingBubbleService : LifecycleService() {
         }
         scheduledFuture = executor.scheduleAtFixedRate({
             elapsedMs = System.currentTimeMillis() - tickStartedAt
-            if (!bubbleHidden) {
-                mainHandler.post { updateBubbleContent() }
+            mainHandler.post {
+                if (!bubbleHidden) updateBubbleContent()
+                updateNotification()
             }
         }, 1000L, 1000L, TimeUnit.MILLISECONDS)
     }
