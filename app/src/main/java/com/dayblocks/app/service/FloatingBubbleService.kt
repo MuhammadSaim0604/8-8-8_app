@@ -345,9 +345,12 @@ class FloatingBubbleService : LifecycleService() {
         }
         scheduledFuture = executor.scheduleAtFixedRate({
             elapsedMs = System.currentTimeMillis() - tickStartedAt
-            mainHandler.post {
-                if (!bubbleHidden) updateBubbleContent()
-                updateNotification()
+            // updateNotification() only touches @Volatile fields and calls nm.notify() —
+            // both are thread-safe, so we skip mainHandler and call directly here.
+            // This means Android's background main-looper throttling cannot freeze it.
+            updateNotification()
+            if (!bubbleHidden) {
+                mainHandler.post { updateBubbleContent() }
             }
         }, 1000L, 1000L, TimeUnit.MILLISECONDS)
     }
